@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nossos Missionários
+### Estaca SP BR Taboão — Igreja de Jesus Cristo dos Santos dos Últimos Dias
 
-## Getting Started
+Painel web responsivo para acompanhamento dos missionários da Estaca SP BR Taboão.
 
-First, run the development server:
+---
+
+## Funcionalidades
+
+- Mural de fotos com status de cada missionário (A caminho / Em campo / Retornou)
+- Contador de missionários por status
+- Cadastro progressivo via modal (informações podem ser adicionadas aos poucos)
+- Tratamento automático de foto: nitidez, iluminação e resolução 4K
+- Mapa do país da missão com estrela na localização e nome oficial da missão
+- Múltiplas opções de ordenação: cronológica, nome, ala, status
+- Totalmente responsivo: desktop, tablet e celular
+
+---
+
+## Stack
+
+| Camada | Tecnologia |
+|---|---|
+| Frontend | Next.js + TypeScript + Tailwind CSS |
+| Banco de dados | Supabase (PostgreSQL) |
+| Armazenamento de fotos | Supabase Storage |
+| Hospedagem | Vercel |
+| Tratamento de imagem | Python (Pillow + OpenCV) |
+
+---
+
+## Configuração
+
+### 1. Clone o repositório
+
+```bash
+git clone https://github.com/ilcileyjunior01/nossos-missionarios.git
+cd nossos-missionarios
+```
+
+### 2. Instale as dependências
+
+```bash
+npm install
+```
+
+### 3. Configure as variáveis de ambiente
+
+```bash
+cp .env.local.example .env.local
+```
+
+Preencha `.env.local` com suas chaves do Supabase.
+
+### 4. Configure o banco de dados
+
+Execute o arquivo `supabase_schema.sql` no SQL Editor do seu projeto Supabase.
+
+### 5. Instale as dependências Python (para tratamento de foto)
+
+```bash
+pip install -r python/requirements.txt
+```
+
+### 6. Inicie o servidor de desenvolvimento
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Estrutura do Projeto
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+nossos-missionarios/
+├── src/
+│   ├── app/              # Páginas e rotas (Next.js App Router)
+│   ├── components/       # Componentes React reutilizáveis
+│   ├── lib/              # Utilitários (Supabase, status, helpers)
+│   └── types/            # Tipos TypeScript
+├── python/
+│   ├── image_processing.py   # Tratamento de imagem
+│   └── requirements.txt
+├── public/               # Arquivos estáticos
+├── supabase_schema.sql   # Schema do banco de dados
+└── .env.local.example    # Modelo de variáveis de ambiente
+```
