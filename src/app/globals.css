@@ -1,26 +1,53 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --navy: #1a2744;
+  --gold: #b8972a;
+  --gold-light: #f0d97a;
+  --background: #f8f8f6;
+  --foreground: #1a1a1a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-navy: var(--navy);
+  --color-gold: var(--gold);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Georgia', serif;
+}
+
+.font-sans-body {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+}
+
+@media print {
+  @page {
+    size: 18cm 13cm landscape;
+    margin: 0;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #plaqueta-missionaria,
+  #plaqueta-missionaria * {
+    visibility: visible !important;
+  }
+
+  #plaqueta-missionaria {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 18cm !important;
+    height: 13cm !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
 }

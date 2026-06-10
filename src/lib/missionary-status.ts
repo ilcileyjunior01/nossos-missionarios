@@ -7,7 +7,7 @@ export function getMissionaryStatus(missionary: Missionary): MissionaryStatus {
   const inicio = missionary.data_inicio ? new Date(missionary.data_inicio) : null
   const termino = missionary.data_termino ? new Date(missionary.data_termino) : null
 
-  if (!inicio) return 'indefinido'
+  if (!inicio) return 'a_caminho'
   if (today < inicio) return 'a_caminho'
   if (termino && today > termino) return 'retornou'
   return 'em_campo'
