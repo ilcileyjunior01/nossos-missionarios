@@ -5,6 +5,7 @@ import { X, Upload, Loader2, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Missionary } from '@/types/missionary'
 import Image from 'next/image'
+import { removeBackground } from '@imgly/background-removal'
 
 export type ModalSavedAction = 'created' | 'updated' | 'deleted'
 
@@ -39,14 +40,87 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
   const [fotoFile, setFotoFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [processingPhoto, setProcessingPhoto] = useState(false)
+  const [photoStep, setPhotoStep] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setFotoFile(file)
-    setFotoPreview(URL.createObjectURL(file))
+
+    setProcessingPhoto(true)
+    setFotoPreview(null)
+    setFotoFile(null)
+
+    try {
+      // 1. Remoção de fundo via IA (modelos ONNX no browser)
+      setPhotoStep('Removendo fundo...')
+      const noBgBlob = await removeBackground(file, {
+        model: 'isnet_fp16',
+        output: { format: 'image/png', quality: 1 },
+      })
+
+      // 2. Fundo branco + suavização de pele no Canvas
+      setPhotoStep('Aplicando retoques...')
+      const processedBlob = await applyWhiteBgAndSmoothing(noBgBlob)
+
+      // 3. Atualiza preview e arquivo para upload
+      const processedFile = new File([processedBlob], file.name.replace(/\.[^.]+$/, '.png'), {
+        type: 'image/png',
+      })
+      setFotoFile(processedFile)
+      setFotoPreview(URL.createObjectURL(processedBlob))
+    } catch (err) {
+      console.error('Processamento de foto falhou, usando original:', err)
+      // Fallback: usa a foto original sem tratamento
+      setFotoFile(file)
+      setFotoPreview(URL.createObjectURL(file))
+    } finally {
+      setProcessingPhoto(false)
+      setPhotoStep('')
+    }
+  }
+
+  /**
+   * Recebe um Blob PNG com fundo transparente, aplica fundo branco
+   * e suavização de pele (blur blend + brilho suave para atenuar olheiras).
+   */
+  function applyWhiteBgAndSmoothing(blob: Blob): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob)
+      const img = new window.Image()
+      img.onload = () => {
+        const { naturalWidth: w, naturalHeight: h } = img
+        const canvas = document.createElement('canvas')
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext('2d')
+        if (!ctx) { reject(new Error('Canvas indisponível')); return }
+
+        // Fundo branco
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, w, h)
+
+        // Camada suavizada (blur 3px a 30% de opacidade) → atenua blemishes e olheiras
+        ctx.filter = 'blur(3px) brightness(1.04)'
+        ctx.globalAlpha = 0.30
+        ctx.drawImage(img, 0, 0)
+
+        // Imagem principal nítida por cima
+        ctx.filter = 'none'
+        ctx.globalAlpha = 1
+        ctx.drawImage(img, 0, 0)
+
+        URL.revokeObjectURL(url)
+        canvas.toBlob(
+          (b) => (b ? resolve(b) : reject(new Error('toBlob falhou'))),
+          'image/png',
+        )
+      }
+      img.onerror = () => reject(new Error('Falha ao carregar imagem'))
+      img.src = url
+    })
   }
 
   async function processImage(file: File): Promise<Blob> {
@@ -246,16 +320,22 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
           {/* Foto */}
           <div className="flex flex-col items-center gap-3">
             <div
-              onClick={() => fileRef.current?.click()}
-              className="w-32 h-40 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center cursor-pointer hover:border-[#b8972a] transition-colors overflow-hidden relative"
+              onClick={() => !processingPhoto && fileRef.current?.click()}
+              className={`w-32 h-40 rounded-xl border-2 border-dashed bg-gray-50 flex items-center justify-center overflow-hidden relative transition-colors ${
+                processingPhoto
+                  ? 'border-[#b8972a] cursor-wait'
+                  : 'border-gray-200 cursor-pointer hover:border-[#b8972a]'
+              }`}
             >
-              {fotoPreview ? (
-                <Image
-                  src={fotoPreview}
-                  alt="Preview"
-                  fill
-                  className="object-cover object-top"
-                />
+              {processingPhoto ? (
+                <div className="flex flex-col items-center gap-2 px-2 text-center">
+                  <Loader2 size={22} className="animate-spin text-[#b8972a]" />
+                  <span className="text-xs text-[#b8972a] font-[family-name:var(--font-inter)] leading-tight">
+                    {photoStep}
+                  </span>
+                </div>
+              ) : fotoPreview ? (
+                <Image src={fotoPreview} alt="Preview" fill className="object-cover object-top" />
               ) : (
                 <div className="flex flex-col items-center gap-1 text-gray-400">
                   <Upload size={24} />
@@ -270,7 +350,7 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
               className="hidden"
               onChange={handleFileChange}
             />
-            {fotoPreview && (
+            {fotoPreview && !processingPhoto && (
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
@@ -278,6 +358,11 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
               >
                 Trocar foto
               </button>
+            )}
+            {!processingPhoto && !fotoPreview && (
+              <p className="text-xs text-gray-400 font-[family-name:var(--font-inter)] text-center max-w-[180px] leading-tight">
+                Fundo removido automaticamente
+              </p>
             )}
           </div>
 
@@ -469,7 +554,7 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
               </button>
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || processingPhoto}
                 className="flex-1 bg-[#1a2744] hover:bg-[#253660] text-white rounded-full py-2.5 text-sm font-[family-name:var(--font-inter)] font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {saving && <Loader2 size={14} className="animate-spin" />}

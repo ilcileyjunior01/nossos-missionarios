@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack(config) {
+    // Necessário para @imgly/background-removal (ONNX WASM + WebGPU)
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      'onnxruntime-web/webgpu': false,
+    }
+    return config
+  },
 };
 
 export default nextConfig;
