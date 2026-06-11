@@ -49,11 +49,24 @@ export default function MissionaryCard({ missionary, onClick }: MissionaryCardPr
         )}
         {/* Barra de progresso da missão */}
         {progress !== null && !returningSoon && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
+          <div className="absolute bottom-0 left-0 right-0 h-2.5 bg-black/30 backdrop-blur-sm">
             <div
-              className="h-full bg-green-400 transition-all"
-              style={{ width: `${progress}%` }}
-            />
+              className="h-full transition-all duration-700 ease-out relative overflow-hidden"
+              style={{
+                width: `${progress}%`,
+                background: 'linear-gradient(90deg, #92700a, #b8972a, #f0d97a)',
+                boxShadow: '0 0 8px rgba(184, 151, 42, 0.8)',
+              }}
+            >
+              {/* efeito de brilho animado */}
+              <span
+                className="absolute inset-0 opacity-40"
+                style={{
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%)',
+                  animation: 'shimmer 2s infinite',
+                }}
+              />
+            </div>
           </div>
         )}
 
