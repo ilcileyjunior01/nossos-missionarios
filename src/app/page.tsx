@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
-import { UserPlus, Loader2, Search, X } from 'lucide-react'
+import { UserPlus, Search, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Missionary, MissionaryStatus, SortOption } from '@/types/missionary'
 import { getMissionaryStatus } from '@/lib/missionary-status'
@@ -14,6 +14,7 @@ import SortBar from '@/components/SortBar'
 import Toast, { ToastType } from '@/components/Toast'
 import WorldMap from '@/components/WorldMap'
 import { useAuth } from '@/contexts/AuthContext'
+import MissionaryCardSkeleton from '@/components/MissionaryCardSkeleton'
 
 const STATUS_ORDER: Record<string, number> = {
   a_caminho: 0,
@@ -266,10 +267,12 @@ export default function Page() {
           )}
         </div>
 
-        {/* Estados de carregamento e erro */}
+        {/* Skeleton loader */}
         {loading && (
-          <div className="flex justify-center items-center py-24 text-gray-400">
-            <Loader2 size={32} className="animate-spin" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <MissionaryCardSkeleton key={i} />
+            ))}
           </div>
         )}
 
