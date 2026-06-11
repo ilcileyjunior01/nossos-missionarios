@@ -114,7 +114,7 @@ export default function MissionaryMap({ missionary }: MissionaryMapProps) {
           </radialGradient>
         </defs>
 
-        <ZoomableGroup center={coords} zoom={4} minZoom={1} maxZoom={20}>
+        <ZoomableGroup center={coords} zoom={4}>
           {/* Fundo oceano */}
           <rect x="-500" y="-500" width="2000" height="2000" fill="url(#mmOceanGrad)" />
 
