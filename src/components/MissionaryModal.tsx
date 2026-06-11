@@ -58,6 +58,7 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
       setPhotoStep('Removendo fundo...')
       const noBgBlob = await removeBackground(file, {
         model: 'isnet_fp16',
+        device: 'cpu',
         output: { format: 'image/png', quality: 1 },
       })
 
@@ -73,7 +74,7 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
       setFotoPreview(URL.createObjectURL(processedBlob))
     } catch (err) {
       console.error('Processamento de foto falhou, usando original:', err)
-      // Fallback: usa a foto original sem tratamento
+      setError('Não foi possível remover o fundo automaticamente. A foto original será usada.')
       setFotoFile(file)
       setFotoPreview(URL.createObjectURL(file))
     } finally {

@@ -246,6 +246,15 @@ export default function PlaquetaPreview({ missionary, nomeEstaca = NOME_ESTACA_P
                   }}>
                     {missionary.nome}
                   </p>
+                  {missionary.ala && (
+                    <p style={{
+                      color: '#7a5010', fontSize: 8.5, letterSpacing: '0.14em',
+                      textTransform: 'uppercase', fontFamily: 'var(--font-inter)',
+                      fontWeight: 500, marginTop: 4,
+                    }}>
+                      {missionary.ala.toLowerCase().startsWith('ala') ? missionary.ala : `Ala ${missionary.ala}`}
+                    </p>
+                  )}
                 </div>
 
                 <div style={{ height: 1, background: 'rgba(140,100,30,0.35)', marginBottom: 8 }} />
