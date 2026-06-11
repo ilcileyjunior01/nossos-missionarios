@@ -42,6 +42,28 @@ export function isReturningSoon(missionary: Missionary): boolean {
   return diffDays >= 0 && diffDays <= 31
 }
 
+export function getDaysUntilReturn(missionary: Missionary): number | null {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  if (!missionary.data_termino) return null
+  const termino = new Date(missionary.data_termino)
+  const diffDays = Math.round((termino.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  return diffDays >= 0 ? diffDays : null
+}
+
+/** Progresso da missão de 0 a 100. Null se não houver datas suficientes. */
+export function getMissionProgress(missionary: Missionary): number | null {
+  if (!missionary.data_inicio || !missionary.data_termino) return null
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const inicio = new Date(missionary.data_inicio)
+  const termino = new Date(missionary.data_termino)
+  const total = termino.getTime() - inicio.getTime()
+  if (total <= 0) return null
+  const elapsed = today.getTime() - inicio.getTime()
+  return Math.min(100, Math.max(0, (elapsed / total) * 100))
+}
+
 export function getMissionaryTimeLabel(missionary: Missionary, status: MissionaryStatus): string {
   const today = new Date()
   today.setHours(0, 0, 0, 0)

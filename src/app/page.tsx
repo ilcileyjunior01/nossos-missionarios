@@ -13,6 +13,7 @@ import StatusCounter from '@/components/StatusCounter'
 import SortBar from '@/components/SortBar'
 import Toast, { ToastType } from '@/components/Toast'
 import WorldMap from '@/components/WorldMap'
+import { useAuth } from '@/contexts/AuthContext'
 
 const STATUS_ORDER: Record<string, number> = {
   a_caminho: 0,
@@ -48,6 +49,9 @@ function sortMissionaries(list: Missionary[], sort: SortOption): Missionary[] {
 }
 
 export default function Page() {
+  const { user } = useAuth()
+  const isAdmin = !!user
+
   const [missionaries, setMissionaries] = useState<Missionary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -251,13 +255,15 @@ export default function Page() {
               🌍 Mapa mundi
             </button>
           </div>
-          <button
-            onClick={openNew}
-            className="flex items-center gap-2 bg-[#1a2744] hover:bg-[#253660] text-white text-sm font-[family-name:var(--font-inter)] font-medium px-4 py-2.5 rounded-full transition-colors self-start sm:self-auto"
-          >
-            <UserPlus size={16} />
-            Novo missionário
-          </button>
+          {isAdmin && (
+            <button
+              onClick={openNew}
+              className="flex items-center gap-2 bg-[#1a2744] hover:bg-[#253660] text-white text-sm font-[family-name:var(--font-inter)] font-medium px-4 py-2.5 rounded-full transition-colors self-start sm:self-auto"
+            >
+              <UserPlus size={16} />
+              Novo missionário
+            </button>
+          )}
         </div>
 
         {/* Estados de carregamento e erro */}
@@ -303,6 +309,7 @@ export default function Page() {
           missionary={detailsMissionary}
           onClose={closeDetails}
           onEdit={openEdit}
+          isAdmin={isAdmin}
         />
       )}
 

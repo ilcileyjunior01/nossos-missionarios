@@ -13,6 +13,7 @@ interface MissionaryDetailsProps {
   missionary: Missionary
   onClose: () => void
   onEdit: (missionary: Missionary) => void
+  isAdmin?: boolean
 }
 
 function formatDate(iso: string | null): string {
@@ -21,7 +22,7 @@ function formatDate(iso: string | null): string {
   return `${day}/${month}/${year}`
 }
 
-export default function MissionaryDetails({ missionary, onClose, onEdit }: MissionaryDetailsProps) {
+export default function MissionaryDetails({ missionary, onClose, onEdit, isAdmin = false }: MissionaryDetailsProps) {
   const status = getMissionaryStatus(missionary)
   const timeLabel = getMissionaryTimeLabel(missionary, status)
   const [showPlaqueta, setShowPlaqueta] = useState(false)
@@ -133,13 +134,15 @@ export default function MissionaryDetails({ missionary, onClose, onEdit }: Missi
             >
               Fechar
             </button>
-            <button
-              onClick={() => onEdit(missionary)}
-              className="flex items-center gap-2 bg-[#1a2744] hover:bg-[#253660] text-white rounded-full px-5 py-2 text-sm font-[family-name:var(--font-inter)] font-medium transition-colors"
-            >
-              <Pencil size={14} />
-              Editar
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => onEdit(missionary)}
+                className="flex items-center gap-2 bg-[#1a2744] hover:bg-[#253660] text-white rounded-full px-5 py-2 text-sm font-[family-name:var(--font-inter)] font-medium transition-colors"
+              >
+                <Pencil size={14} />
+                Editar
+              </button>
+            )}
           </div>
         </div>
 

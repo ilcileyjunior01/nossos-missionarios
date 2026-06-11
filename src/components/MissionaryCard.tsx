@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { Missionary } from '@/types/missionary'
-import { getMissionaryStatus, getMissionaryTimeLabel, isReturningSoon } from '@/lib/missionary-status'
+import { getMissionaryStatus, getMissionaryTimeLabel, isReturningSoon, getDaysUntilReturn, getMissionProgress } from '@/lib/missionary-status'
 import StatusBadge from './StatusBadge'
 import { UserCircle, MapPin } from 'lucide-react'
 
@@ -15,6 +15,17 @@ export default function MissionaryCard({ missionary, onClick }: MissionaryCardPr
   const status = getMissionaryStatus(missionary)
   const timeLabel = getMissionaryTimeLabel(missionary, status)
   const returningSoon = isReturningSoon(missionary)
+  const daysUntilReturn = getDaysUntilReturn(missionary)
+  const progress = status === 'em_campo' ? getMissionProgress(missionary) : null
+
+  function returnBannerLabel(): string {
+    if (daysUntilReturn === null) return 'Retornando em breve'
+    if (daysUntilReturn === 0) return 'Retorna hoje!'
+    if (daysUntilReturn === 1) return 'Retorna amanhã!'
+    return `Retorna em ${daysUntilReturn} dias`
+  }
+
+  const bannerUrgent = daysUntilReturn !== null && daysUntilReturn <= 7
 
   return (
     <div
@@ -36,9 +47,19 @@ export default function MissionaryCard({ missionary, onClick }: MissionaryCardPr
             <UserCircle size={64} />
           </div>
         )}
+        {/* Barra de progresso da missão */}
+        {progress !== null && !returningSoon && (
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
+            <div
+              className="h-full bg-green-400 transition-all"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
+
         {returningSoon && (
-          <div className="absolute bottom-0 left-0 right-0 bg-amber-500 text-white text-[11px] font-semibold text-center py-1 tracking-wide font-[family-name:var(--font-inter)]">
-            Retornando em breve
+          <div className={`absolute bottom-0 left-0 right-0 text-white text-[11px] font-semibold text-center py-1 tracking-wide font-[family-name:var(--font-inter)] ${bannerUrgent ? 'bg-red-500' : 'bg-amber-500'}`}>
+            {returnBannerLabel()}
           </div>
         )}
       </div>
