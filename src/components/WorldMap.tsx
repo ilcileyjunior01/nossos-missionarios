@@ -232,9 +232,16 @@ export default function WorldMap({ missionaries, filterStatus }: WorldMapProps) 
         >
           <p className="font-semibold text-amber-300 whitespace-nowrap">{tooltip.name}</p>
           {tooltip.missionaryNames.length > 0 && (
-            <ul className="mt-1 space-y-0.5">
+            <ul className="mt-1.5 space-y-1">
               {tooltip.missionaryNames.map((nome) => (
-                <li key={nome} className="text-amber-100/80 leading-tight">
+                <li key={nome} className="text-amber-100/80 leading-tight flex items-center gap-1.5">
+                  <svg width="8" height="11" viewBox="0 0 8 11" className="shrink-0">
+                    <path
+                      d="M4 0C2.343 0 1 1.343 1 3c0 2.5 3 8 3 8s3-5.5 3-8C7 1.343 5.657 0 4 0z"
+                      fill="#f0c040"
+                    />
+                    <text x="4" y="4.5" textAnchor="middle" fontSize="3.5" fill="#7a4e08" fontWeight="bold">★</text>
+                  </svg>
                   {nome}
                 </li>
               ))}
