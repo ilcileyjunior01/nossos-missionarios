@@ -4,14 +4,21 @@ import Image from 'next/image'
 import { Missionary } from '@/types/missionary'
 import { getMissionaryStatus, getMissionaryTimeLabel, isReturningSoon, getDaysUntilReturn, getMissionProgress } from '@/lib/missionary-status'
 import StatusBadge from './StatusBadge'
-import { UserCircle, MapPin } from 'lucide-react'
+import { MapPin, Bell } from 'lucide-react'
 
 interface MissionaryCardProps {
   missionary: Missionary
   onClick: (missionary: Missionary) => void
+  index?: number
 }
 
-export default function MissionaryCard({ missionary, onClick }: MissionaryCardProps) {
+function getInitials(nome: string): string {
+  const parts = nome.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0][0].toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+export default function MissionaryCard({ missionary, onClick, index = 0 }: MissionaryCardProps) {
   const status = getMissionaryStatus(missionary)
   const timeLabel = getMissionaryTimeLabel(missionary, status)
   const returningSoon = isReturningSoon(missionary)
@@ -30,7 +37,10 @@ export default function MissionaryCard({ missionary, onClick }: MissionaryCardPr
   return (
     <div
       onClick={() => onClick(missionary)}
-      className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col"
+      className="card-enter bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer
+        hover:shadow-[0_8px_30px_rgba(184,151,42,0.18)] hover:-translate-y-1 hover:scale-[1.02]
+        hover:border-[#b8972a]/40 transition-all duration-200 flex flex-col"
+      style={{ animationDelay: `${index * 55}ms` }}
     >
       {/* Foto */}
       <div className="relative w-full aspect-[3/4] bg-gray-100">
@@ -43,10 +53,25 @@ export default function MissionaryCard({ missionary, onClick }: MissionaryCardPr
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
-            <UserCircle size={64} />
+          <div
+            className="w-full h-full flex items-center justify-center"
+            style={{
+              background: 'linear-gradient(160deg, #1a2744 0%, #253660 60%, #1a2744 100%)',
+            }}
+          >
+            <span
+              className="text-4xl font-bold tracking-wider select-none"
+              style={{
+                fontFamily: 'var(--font-playfair)',
+                color: '#b8972a',
+                textShadow: '0 2px 8px rgba(184,151,42,0.4)',
+              }}
+            >
+              {getInitials(missionary.nome)}
+            </span>
           </div>
         )}
+
         {/* Barra de progresso da missão */}
         {progress !== null && !returningSoon && (
           <div className="absolute bottom-0 left-0 right-0 h-2.5 bg-black/30 backdrop-blur-sm">
@@ -58,7 +83,6 @@ export default function MissionaryCard({ missionary, onClick }: MissionaryCardPr
                 boxShadow: '0 0 8px rgba(184, 151, 42, 0.8)',
               }}
             >
-              {/* efeito de brilho animado */}
               <span
                 className="absolute inset-0 opacity-40"
                 style={{
@@ -70,8 +94,15 @@ export default function MissionaryCard({ missionary, onClick }: MissionaryCardPr
           </div>
         )}
 
+        {/* Banner de retorno */}
         {returningSoon && (
-          <div className={`absolute bottom-0 left-0 right-0 text-white text-[11px] font-semibold text-center py-1 tracking-wide font-[family-name:var(--font-inter)] ${bannerUrgent ? 'bg-red-500' : 'bg-amber-500'}`}>
+          <div
+            className={`absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5
+              text-white font-semibold text-center tracking-wide font-[family-name:var(--font-inter)]
+              ${bannerUrgent ? 'bg-red-500 text-[12px] py-1.5' : 'bg-amber-500 text-[11px] py-1'}`}
+            style={bannerUrgent ? { animation: 'pulseUrgent 1.5s ease-in-out infinite' } : undefined}
+          >
+            {bannerUrgent && <Bell size={11} className="shrink-0" />}
             {returnBannerLabel()}
           </div>
         )}

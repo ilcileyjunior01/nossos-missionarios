@@ -296,8 +296,8 @@ export default function Page() {
 
         {!loading && !error && sorted.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {sorted.map((m) => (
-              <MissionaryCard key={m.id} missionary={m} onClick={openDetails} />
+            {sorted.map((m, i) => (
+              <MissionaryCard key={m.id} missionary={m} onClick={openDetails} index={i} />
             ))}
           </div>
         )}
