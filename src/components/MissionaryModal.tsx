@@ -310,6 +310,7 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
           </h2>
           <button
             onClick={onClose}
+            aria-label="Fechar"
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
             <X size={20} />

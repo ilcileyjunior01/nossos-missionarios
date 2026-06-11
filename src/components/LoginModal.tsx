@@ -55,6 +55,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Fechar"
             className="text-white/60 hover:text-white transition-colors"
           >
             <X size={18} />

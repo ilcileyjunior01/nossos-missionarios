@@ -40,7 +40,7 @@ export default function MissionaryDetails({ missionary, onClose, onEdit, isAdmin
           >
             Detalhes
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button onClick={onClose} aria-label="Fechar" className="text-gray-400 hover:text-gray-600 transition-colors">
             <X size={20} />
           </button>
         </div>

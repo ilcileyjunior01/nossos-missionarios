@@ -67,15 +67,25 @@ export default function Header() {
           <div className="flex items-center gap-3">
             <TempleIcon />
             <div className="text-center sm:text-left">
+              <p
+                className="text-xl sm:text-3xl font-bold tracking-[0.22em] uppercase"
+                style={{
+                  fontFamily: 'var(--font-playfair)',
+                  background: 'linear-gradient(90deg, #92700a, #f0d97a 40%, #d4a843 60%, #92700a)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  filter: 'drop-shadow(0 2px 6px rgba(240,217,122,0.5))',
+                }}
+              >
+                ✦ Estaca SP BR Taboão ✦
+              </p>
               <h1
-                className="text-2xl sm:text-3xl font-bold tracking-wide"
-                style={{ fontFamily: 'var(--font-playfair)' }}
+                className="text-sm sm:text-base font-medium tracking-wide text-white/70 mt-0.5"
+                style={{ fontFamily: 'var(--font-inter)' }}
               >
                 Nossos Missionários
               </h1>
-              <p className="text-[#f0d97a] text-sm mt-0.5 font-[family-name:var(--font-inter)] tracking-widest uppercase">
-                Estaca SP BR Taboão
-              </p>
             </div>
           </div>
 

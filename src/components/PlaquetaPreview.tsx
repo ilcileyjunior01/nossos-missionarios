@@ -201,6 +201,7 @@ export default function PlaquetaPreview({ missionary, nomeEstaca = NOME_ESTACA_P
         </button>
         <button
           onClick={onClose}
+          aria-label="Fechar"
           className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors"
         >
           <X size={18} />

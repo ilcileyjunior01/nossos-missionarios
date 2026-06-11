@@ -75,6 +75,7 @@ export default function Page() {
       .select('*')
     if (error) {
       setError('Erro ao carregar missionários.')
+      setToast({ message: 'Erro ao carregar missionários. Tente novamente.', type: 'error' })
     } else {
       setMissionaries(data ?? [])
     }
