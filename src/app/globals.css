@@ -20,7 +20,7 @@ body {
   background-image:
     repeating-linear-gradient(0deg, rgba(100,75,30,0.04) 0, rgba(100,75,30,0.04) 1px, transparent 1px, transparent 4px),
     repeating-linear-gradient(90deg, rgba(100,75,30,0.03) 0, rgba(100,75,30,0.03) 1px, transparent 1px, transparent 4px),
-    linear-gradient(rgba(236,229,211,0.72), rgba(236,229,211,0.72)),
+    linear-gradient(rgba(236,229,211,0.55), rgba(236,229,211,0.55)),
     url('https://noticias-br.aigrejadejesuscristo.org/media/960x720/Centro_de_visitantes_Externa-090-min.jpg');
   background-size: auto, auto, auto, cover;
   background-position: center, center, center, center;
