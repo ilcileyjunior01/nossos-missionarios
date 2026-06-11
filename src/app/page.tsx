@@ -7,14 +7,17 @@ import { Missionary, MissionaryStatus, SortOption } from '@/types/missionary'
 import { getMissionaryStatus } from '@/lib/missionary-status'
 import Header from '@/components/Header'
 import MissionaryCard from '@/components/MissionaryCard'
-import MissionaryModal, { ModalSavedAction } from '@/components/MissionaryModal'
-import MissionaryDetails from '@/components/MissionaryDetails'
+import type { ModalSavedAction } from '@/components/MissionaryModal'
+const MissionaryModal = dynamic(() => import('@/components/MissionaryModal'))
+import dynamic from 'next/dynamic'
 import StatusCounter from '@/components/StatusCounter'
 import SortBar from '@/components/SortBar'
 import Toast, { ToastType } from '@/components/Toast'
-import WorldMap from '@/components/WorldMap'
 import { useAuth } from '@/contexts/AuthContext'
 import MissionaryCardSkeleton from '@/components/MissionaryCardSkeleton'
+
+const MissionaryDetails = dynamic(() => import('@/components/MissionaryDetails'), { ssr: false })
+const WorldMap = dynamic(() => import('@/components/WorldMap'), { ssr: false })
 
 const STATUS_ORDER: Record<string, number> = {
   a_caminho: 0,
