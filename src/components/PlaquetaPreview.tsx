@@ -80,9 +80,8 @@ function PlaqueBorder({ w, h }: { w: number; h: number }) {
 
   return (
     <svg
-      width={w} height={h}
       viewBox={`0 0 ${w} ${h}`}
-      style={{ position: 'absolute', inset: 0, pointerEvents: 'none', borderRadius: 10 }}
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', borderRadius: 10 }}
     >
       <defs>
         <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">

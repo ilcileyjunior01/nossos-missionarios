@@ -39,23 +39,55 @@ body {
     margin: 0;
   }
 
+  /* Colapsa o fluxo normal a altura zero → exatamente 1 página impressa */
+  html, body {
+    width: 18cm !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  /* Oculta todo o restante do conteúdo */
   body * {
     visibility: hidden !important;
   }
 
+  /* Exibe apenas a plaqueta e seus filhos */
   #plaqueta-missionaria,
   #plaqueta-missionaria * {
     visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
+  /* position: fixed com body de altura 0 → aparece somente na única página impressa.
+     zoom: 1.26 escala 540×390 px (prévia) → ~680×491 px = 18cm×13cm em 96 dpi,
+     preservando exatamente as proporções e medidas da prévia em tela. */
   #plaqueta-missionaria {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    width: 18cm !important;
-    height: 13cm !important;
+    width: 540px !important;
+    height: 390px !important;
+    zoom: 1.26 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     border: none !important;
+    margin: 0 !important;
+  }
+
+  /* Gradientes SVG não imprimem — substitui por dourado sólido */
+  #plaqueta-missionaria [fill="url(#borderGrad)"] {
+    fill: #c9991f !important;
+  }
+  #plaqueta-missionaria [stroke="url(#borderGrad)"] {
+    stroke: #c9991f !important;
+  }
+
+  /* Remove filtros SVG que causam artefatos na impressão */
+  #plaqueta-missionaria svg * {
+    filter: none !important;
   }
 }
