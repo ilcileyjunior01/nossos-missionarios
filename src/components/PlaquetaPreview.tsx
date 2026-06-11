@@ -121,15 +121,50 @@ function PlaqueBorder({ w, h }: { w: number; h: number }) {
         </g>
       ))}
 
-      {/* Mid-edge diamonds — centered on each side of inner frame */}
-      {([
-        [i.x + i.w / 2, i.y],
-        [i.x + i.w / 2, i.y + i.h],
-        [i.x, i.y + i.h / 2],
-        [i.x + i.w, i.y + i.h / 2],
-      ] as [number, number][]).map(([cx, cy], idx) => (
-        <polygon key={idx} points={diamond(cx, cy, 3.5)}
-          fill={g} opacity="0.65" />
+      {/* ── Símbolos LDS nos centros de cada lado ── */}
+
+      {/* Templo — centro superior */}
+      <g transform={`translate(${i.x + i.w / 2}, ${i.y})`} fill={g} opacity="0.78">
+        {/* Espira central */}
+        <polygon points="0,-13 -2.5,-5 2.5,-5" />
+        <rect x={-2} y={-5} width={4} height={5} />
+        {/* Espiras laterais internas */}
+        <polygon points="-6,-9 -8,-3 -4,-3" />
+        <rect x={-7.5} y={-3} width={3} height={4} />
+        <polygon points="6,-9 4,-3 8,-3" />
+        <rect x={4.5} y={-3} width={3} height={4} />
+        {/* Espiras externas */}
+        <polygon points="-12,-6 -14,-1 -10,-1" />
+        <rect x={-13.5} y={-1} width={3} height={3} />
+        <polygon points="12,-6 10,-1 14,-1" />
+        <rect x={10.5} y={-1} width={3} height={3} />
+        {/* Corpo */}
+        <rect x={-15} y={2} width={30} height={9} />
+        {/* Janelas */}
+        <rect x={-11} y={4} width={4} height={5} fill="#e8d5a0" opacity={0.5} />
+        <rect x={-2} y={4} width={4} height={5} fill="#e8d5a0" opacity={0.5} />
+        <rect x={7} y={4} width={4} height={5} fill="#e8d5a0" opacity={0.5} />
+        {/* Base */}
+        <rect x={-16} y={11} width={32} height={2.5} />
+      </g>
+
+      {/* Escrituras abertas — centro inferior */}
+      <g transform={`translate(${i.x + i.w / 2}, ${i.y + i.h})`} opacity="0.75" stroke={g} fill="none">
+        <path d="M0,-5 L-16,-12 L-16,7 L0,7 Z" strokeWidth={1.4} />
+        <path d="M0,-5 L16,-12 L16,7 L0,7 Z" strokeWidth={1.4} />
+        <line x1={0} y1={-12} x2={0} y2={7} strokeWidth={2} />
+      </g>
+
+      {/* Espiras do templo — centros laterais */}
+      {([[i.x, i.y + i.h / 2], [i.x + i.w, i.y + i.h / 2]] as [number, number][]).map(([cx, cy], idx) => (
+        <g key={`temple-${idx}`} transform={`translate(${cx}, ${cy})`} fill={g} opacity="0.75">
+          <polygon points="0,-18 -4,-5 4,-5" />
+          <rect x={-3.5} y={-5} width={7} height={10} />
+          <polygon points="-8,-12 -11,-4 -5,-4" />
+          <rect x={-10.5} y={-4} width={5.5} height={8} />
+          <polygon points="8,-12 5,-4 11,-4" />
+          <rect x={5} y={-4} width={5.5} height={8} />
+        </g>
       ))}
     </svg>
   )

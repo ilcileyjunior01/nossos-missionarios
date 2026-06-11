@@ -151,6 +151,43 @@ export default function Page() {
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
+        {/* Banner inspiracional */}
+        <div
+          className="rounded-2xl overflow-hidden relative shadow-lg"
+          style={{
+            height: 170,
+            backgroundImage: `
+              linear-gradient(rgba(26,39,68,0.45), rgba(26,39,68,0.72)),
+              url('https://news-sg.churchofjesuschrist.org/media/960x720/christus-jesus-christ-mormon.jpg')
+            `,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 12%',
+          }}
+        >
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-4 text-center">
+            <p
+              className="text-[#f0d97a] text-xl sm:text-2xl font-bold drop-shadow-md"
+              style={{ fontFamily: 'var(--font-playfair)', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}
+            >
+              "Ide por todo o mundo e pregai o evangelho"
+            </p>
+            <p className="text-gray-300 text-xs font-[family-name:var(--font-inter)] tracking-widest uppercase mt-1 drop-shadow">
+              Marcos 16:15
+            </p>
+          </div>
+        </div>
+
+        {/* Divisor ornamental */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, #b8972a)' }} />
+          <svg width="32" height="14" viewBox="0 0 32 14" fill="none">
+            <polygon points="16,0 32,7 16,14 0,7" fill="#b8972a" opacity="0.5" />
+            <polygon points="16,3 29,7 16,11 3,7" fill="#b8972a" opacity="0.35" />
+            <circle cx="16" cy="7" r="2.5" fill="#b8972a" opacity="0.7" />
+          </svg>
+          <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, transparent, #b8972a)' }} />
+        </div>
+
         {/* Contadores de status */}
         {!loading && !error && (
           <StatusCounter
@@ -162,7 +199,7 @@ export default function Page() {
 
         {/* Mapa mundi */}
         {!loading && !error && showMap && (
-          <WorldMap missionaries={missionaries} />
+          <WorldMap missionaries={missionaries} filterStatus={filterStatus} />
         )}
 
         {/* Busca e filtro por ala */}

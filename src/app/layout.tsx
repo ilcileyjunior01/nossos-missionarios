@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${playfair.variable} ${inter.variable} h-full`}>
-      <body className="min-h-full flex flex-col bg-[#f8f8f6] text-[#1a1a1a] font-[family-name:var(--font-inter)]">
+      <body className="min-h-full flex flex-col text-[#1a1a1a] font-[family-name:var(--font-inter)]">
         {children}
       </body>
     </html>

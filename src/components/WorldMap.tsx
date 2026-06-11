@@ -2,13 +2,15 @@
 
 import { useState, useRef } from 'react'
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps'
-import { Missionary } from '@/types/missionary'
+import { Missionary, MissionaryStatus } from '@/types/missionary'
+import { getMissionaryStatus } from '@/lib/missionary-status'
 import { getCountryName } from '@/lib/countryNames'
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
 
 interface WorldMapProps {
   missionaries: Missionary[]
+  filterStatus?: MissionaryStatus | null
 }
 
 interface Tooltip {
@@ -26,11 +28,21 @@ function normalize(str: string) {
     .trim()
 }
 
-export default function WorldMap({ missionaries }: WorldMapProps) {
+const STATUS_LABEL: Record<string, string> = {
+  em_campo:  'Em campo',
+  a_caminho: 'A caminho',
+  retornou:  'Retornaram',
+}
+
+export default function WorldMap({ missionaries, filterStatus }: WorldMapProps) {
   const [tooltip, setTooltip] = useState<Tooltip | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const markers = missionaries
+  const filtered = filterStatus
+    ? missionaries.filter((m) => getMissionaryStatus(m) === filterStatus)
+    : missionaries
+
+  const markers = filtered
     .filter((m) => m.latitude != null && m.longitude != null)
     .map((m) => ({
       id: m.id,
@@ -69,11 +81,11 @@ export default function WorldMap({ missionaries }: WorldMapProps) {
           className="text-base font-bold text-amber-300"
           style={{ fontFamily: 'var(--font-playfair)' }}
         >
-          Missionários no mundo
+          {filterStatus ? `${STATUS_LABEL[filterStatus]} no mundo` : 'Missionários no mundo'}
         </h2>
         {unique.length > 0 && (
           <span className="text-xs text-amber-400/70 font-[family-name:var(--font-inter)]">
-            {unique.length} {unique.length === 1 ? 'local ativo' : 'locais ativos'}
+            {filtered.length} {filtered.length === 1 ? 'missionário' : 'missionários'} · {unique.length} {unique.length === 1 ? 'local' : 'locais'}
           </span>
         )}
       </div>
@@ -154,7 +166,7 @@ export default function WorldMap({ missionaries }: WorldMapProps) {
                   if (!name || !containerRef.current) return
                   const rect = containerRef.current.getBoundingClientRect()
                   const normName = normalize(name)
-                  const missionaryNames = missionaries
+                  const missionaryNames = filtered
                     .filter((m) => m.pais_missao && normalize(m.pais_missao) === normName)
                     .map((m) => m.nome)
                   setTooltip({
