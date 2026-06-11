@@ -188,7 +188,7 @@ export default function PlaquetaPreview({ missionary, nomeEstaca = NOME_ESTACA_P
   const fittedRef = useRef(false)
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
 
       {/* Controles */}
       <div className="absolute top-4 right-4 flex gap-2 print:hidden">

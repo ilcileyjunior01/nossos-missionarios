@@ -44,6 +44,7 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
   const [photoStep, setPhotoStep] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [submitAttempted, setSubmitAttempted] = useState(false)
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -231,8 +232,10 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!nome.trim() || !ala.trim() || !genero) {
-      setError('Nome, gênero e ala são obrigatórios.')
+    setSubmitAttempted(true)
+    const datesInvalid = dataInicio && dataTermino && dataTermino < dataInicio
+    if (!nome.trim() || !ala.trim() || !genero || datesInvalid) {
+      setError(datesInvalid ? 'A data de término deve ser após a data de início.' : 'Preencha os campos obrigatórios destacados.')
       return
     }
     setSaving(true)
@@ -297,8 +300,8 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="modal-panel bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
 
         {/* Cabeçalho do modal */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl">
@@ -378,8 +381,15 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
               value={nome}
               onChange={e => setNome(e.target.value)}
               placeholder="Ex: João da Silva Santos"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-[family-name:var(--font-inter)] focus:outline-none focus:border-[#1a2744] transition-colors"
+              className={`w-full border rounded-lg px-3 py-2 text-sm font-[family-name:var(--font-inter)] focus:outline-none transition-colors ${
+                submitAttempted && !nome.trim()
+                  ? 'border-red-400 focus:border-red-400 bg-red-50'
+                  : 'border-gray-200 focus:border-[#1a2744]'
+              }`}
             />
+            {submitAttempted && !nome.trim() && (
+              <p className="text-xs text-red-500 mt-1 font-[family-name:var(--font-inter)]">Campo obrigatório</p>
+            )}
           </div>
 
           {/* Gênero */}
@@ -387,7 +397,7 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
             <label className="block text-xs font-semibold text-gray-500 font-[family-name:var(--font-inter)] mb-1 uppercase tracking-wide">
               Gênero <span className="text-red-400">*</span>
             </label>
-            <div className="flex gap-3">
+            <div className={`flex gap-3 rounded-lg p-0.5 transition-colors ${submitAttempted && !genero ? 'ring-2 ring-red-400 rounded-lg' : ''}`}>
               <button
                 type="button"
                 onClick={() => setGenero('M')}
@@ -411,6 +421,9 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
                 Sister (Mulher)
               </button>
             </div>
+            {submitAttempted && !genero && (
+              <p className="text-xs text-red-500 mt-1 font-[family-name:var(--font-inter)]">Selecione o gênero</p>
+            )}
           </div>
 
           {/* Ala */}
@@ -424,38 +437,59 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
               onChange={e => setAla(e.target.value)}
               placeholder="Ex: Ala Taboão"
               list="alas-list"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-[family-name:var(--font-inter)] focus:outline-none focus:border-[#1a2744] transition-colors"
+              className={`w-full border rounded-lg px-3 py-2 text-sm font-[family-name:var(--font-inter)] focus:outline-none transition-colors ${
+                submitAttempted && !ala.trim()
+                  ? 'border-red-400 focus:border-red-400 bg-red-50'
+                  : 'border-gray-200 focus:border-[#1a2744]'
+              }`}
             />
             <datalist id="alas-list">
               {ALAS.map(a => <option key={a} value={a} />)}
             </datalist>
+            {submitAttempted && !ala.trim() && (
+              <p className="text-xs text-red-500 mt-1 font-[family-name:var(--font-inter)]">Campo obrigatório</p>
+            )}
           </div>
 
           {/* Datas */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 font-[family-name:var(--font-inter)] mb-1 uppercase tracking-wide">
-                Data de início
-              </label>
-              <input
-                type="date"
-                value={dataInicio}
-                onChange={e => setDataInicio(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-[family-name:var(--font-inter)] focus:outline-none focus:border-[#1a2744] transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 font-[family-name:var(--font-inter)] mb-1 uppercase tracking-wide">
-                Data de término
-              </label>
-              <input
-                type="date"
-                value={dataTermino}
-                onChange={e => setDataTermino(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-[family-name:var(--font-inter)] focus:outline-none focus:border-[#1a2744] transition-colors"
-              />
-            </div>
-          </div>
+          {(() => {
+            const datesInvalid = submitAttempted && dataInicio && dataTermino && dataTermino < dataInicio
+            return (
+              <div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 font-[family-name:var(--font-inter)] mb-1 uppercase tracking-wide">
+                      Data de início
+                    </label>
+                    <input
+                      type="date"
+                      value={dataInicio}
+                      onChange={e => setDataInicio(e.target.value)}
+                      className={`w-full border rounded-lg px-3 py-2 text-sm font-[family-name:var(--font-inter)] focus:outline-none transition-colors ${
+                        datesInvalid ? 'border-red-400 focus:border-red-400 bg-red-50' : 'border-gray-200 focus:border-[#1a2744]'
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 font-[family-name:var(--font-inter)] mb-1 uppercase tracking-wide">
+                      Data de término
+                    </label>
+                    <input
+                      type="date"
+                      value={dataTermino}
+                      onChange={e => setDataTermino(e.target.value)}
+                      className={`w-full border rounded-lg px-3 py-2 text-sm font-[family-name:var(--font-inter)] focus:outline-none transition-colors ${
+                        datesInvalid ? 'border-red-400 focus:border-red-400 bg-red-50' : 'border-gray-200 focus:border-[#1a2744]'
+                      }`}
+                    />
+                  </div>
+                </div>
+                {datesInvalid && (
+                  <p className="text-xs text-red-500 mt-1 font-[family-name:var(--font-inter)]">A data de término deve ser após a data de início</p>
+                )}
+              </div>
+            )
+          })()}
 
           {/* País da missão */}
           <div>
