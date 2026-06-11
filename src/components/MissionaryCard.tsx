@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { Missionary } from '@/types/missionary'
-import { getMissionaryStatus, getMissionaryTimeLabel } from '@/lib/missionary-status'
+import { getMissionaryStatus, getMissionaryTimeLabel, isReturningSoon } from '@/lib/missionary-status'
 import StatusBadge from './StatusBadge'
 import { UserCircle, MapPin } from 'lucide-react'
 
@@ -14,6 +14,7 @@ interface MissionaryCardProps {
 export default function MissionaryCard({ missionary, onClick }: MissionaryCardProps) {
   const status = getMissionaryStatus(missionary)
   const timeLabel = getMissionaryTimeLabel(missionary, status)
+  const returningSoon = isReturningSoon(missionary)
 
   return (
     <div
@@ -33,6 +34,11 @@ export default function MissionaryCard({ missionary, onClick }: MissionaryCardPr
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-300">
             <UserCircle size={64} />
+          </div>
+        )}
+        {returningSoon && (
+          <div className="absolute bottom-0 left-0 right-0 bg-amber-500 text-white text-[11px] font-semibold text-center py-1 tracking-wide font-[family-name:var(--font-inter)]">
+            Retornando em breve
           </div>
         )}
       </div>

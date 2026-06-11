@@ -33,6 +33,15 @@ export function getStatusColor(status: MissionaryStatus): string {
   return colors[status]
 }
 
+export function isReturningSoon(missionary: Missionary): boolean {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  if (!missionary.data_termino) return false
+  const termino = new Date(missionary.data_termino)
+  const diffDays = Math.round((termino.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  return diffDays >= 0 && diffDays <= 31
+}
+
 export function getMissionaryTimeLabel(missionary: Missionary, status: MissionaryStatus): string {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
