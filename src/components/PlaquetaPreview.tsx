@@ -123,29 +123,25 @@ function PlaqueBorder({ w, h }: { w: number; h: number }) {
 
       {/* ── Símbolos LDS nos centros de cada lado ── */}
 
-      {/* Templo — centro superior */}
+      {/* Templo de SP — centro superior */}
       <g transform={`translate(${i.x + i.w / 2}, ${i.y})`} fill={g} opacity="0.78">
-        {/* Espira central */}
-        <polygon points="0,-13 -2.5,-5 2.5,-5" />
-        <rect x={-2} y={-5} width={4} height={5} />
-        {/* Espiras laterais internas */}
-        <polygon points="-6,-9 -8,-3 -4,-3" />
-        <rect x={-7.5} y={-3} width={3} height={4} />
-        <polygon points="6,-9 4,-3 8,-3" />
-        <rect x={4.5} y={-3} width={3} height={4} />
-        {/* Espiras externas */}
-        <polygon points="-12,-6 -14,-1 -10,-1" />
-        <rect x={-13.5} y={-1} width={3} height={3} />
-        <polygon points="12,-6 10,-1 14,-1" />
-        <rect x={10.5} y={-1} width={3} height={3} />
-        {/* Corpo */}
-        <rect x={-15} y={2} width={30} height={9} />
-        {/* Janelas */}
-        <rect x={-11} y={4} width={4} height={5} fill="#e8d5a0" opacity={0.5} />
-        <rect x={-2} y={4} width={4} height={5} fill="#e8d5a0" opacity={0.5} />
-        <rect x={7} y={4} width={4} height={5} fill="#e8d5a0" opacity={0.5} />
+        {/* Figura no topo */}
+        <circle cx={0} cy={-17} r={1.5} />
+        {/* Espira esbelta */}
+        <path d="M0,-17 L-2,-6 L2,-6 Z" />
+        {/* Torre: topo escalonado */}
+        <rect x={-3} y={-6} width={6} height={2.5} />
+        <rect x={-4.5} y={-3.5} width={9} height={2} />
+        {/* Torre: corpo */}
+        <rect x={-4.5} y={-1.5} width={9} height={9} />
+        {/* Portal arqueado central */}
+        <rect x={-2} y={1} width={4} height={6.5} fill="#e8d5a0" opacity={0.4} />
+        {/* Alas baixas */}
+        <rect x={-14} y={4} width={9.5} height={3.5} />
+        <rect x={4.5} y={4} width={9.5} height={3.5} />
         {/* Base */}
-        <rect x={-16} y={11} width={32} height={2.5} />
+        <rect x={-14} y={7.5} width={28} height={2} />
+        <rect x={-12} y={9.5} width={24} height={1.5} />
       </g>
 
       {/* Escrituras abertas — centro inferior */}
@@ -155,15 +151,26 @@ function PlaqueBorder({ w, h }: { w: number; h: number }) {
         <line x1={0} y1={-12} x2={0} y2={7} strokeWidth={2} />
       </g>
 
-      {/* Espiras do templo — centros laterais */}
+      {/* Templo de SP — centros laterais */}
       {([[i.x, i.y + i.h / 2], [i.x + i.w, i.y + i.h / 2]] as [number, number][]).map(([cx, cy], idx) => (
-        <g key={`temple-${idx}`} transform={`translate(${cx}, ${cy})`} fill={g} opacity="0.75">
-          <polygon points="0,-18 -4,-5 4,-5" />
-          <rect x={-3.5} y={-5} width={7} height={10} />
-          <polygon points="-8,-12 -11,-4 -5,-4" />
-          <rect x={-10.5} y={-4} width={5.5} height={8} />
-          <polygon points="8,-12 5,-4 11,-4" />
-          <rect x={5} y={-4} width={5.5} height={8} />
+        <g key={`temple-${idx}`} transform={`translate(${cx}, ${cy})`} fill={g} opacity="0.72">
+          {/* Figura no topo */}
+          <circle cx={0} cy={-18} r={1.2} />
+          {/* Espira esbelta */}
+          <path d="M0,-18 L-1.8,-8 L1.8,-8 Z" />
+          {/* Torre escalonada */}
+          <rect x={-2.5} y={-8} width={5} height={2.5} />
+          <rect x={-3.5} y={-5.5} width={7} height={2} />
+          {/* Torre corpo */}
+          <rect x={-3.5} y={-3.5} width={7} height={7} />
+          {/* Portal */}
+          <rect x={-1.5} y={-1.5} width={3} height={5} fill="#e8d5a0" opacity={0.4} />
+          {/* Alas baixas */}
+          <rect x={-10} y={0} width={6.5} height={3.5} />
+          <rect x={3.5} y={0} width={6.5} height={3.5} />
+          {/* Base */}
+          <rect x={-10} y={3.5} width={20} height={2} />
+          <rect x={-8} y={5.5} width={16} height={1.5} />
         </g>
       ))}
     </svg>
