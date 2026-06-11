@@ -120,13 +120,15 @@ export default function MissionaryDetails({ missionary, onClose, onEdit, isAdmin
 
         {/* Rodapé */}
         <div className="px-6 py-4 flex justify-between items-center gap-3">
-          <button
-            onClick={() => setShowPlaqueta(true)}
-            className="flex items-center gap-2 border border-[#b8972a] text-[#b8972a] hover:bg-[#b8972a]/5 rounded-full px-4 py-2 text-sm font-[family-name:var(--font-inter)] transition-colors"
-          >
-            <Award size={14} />
-            Prévia da placa
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setShowPlaqueta(true)}
+              className="flex items-center gap-2 border border-[#b8972a] text-[#b8972a] hover:bg-[#b8972a]/5 rounded-full px-4 py-2 text-sm font-[family-name:var(--font-inter)] transition-colors"
+            >
+              <Award size={14} />
+              Prévia da placa
+            </button>
+          )}
           <div className="flex gap-3">
             <button
               onClick={onClose}
@@ -149,7 +151,7 @@ export default function MissionaryDetails({ missionary, onClose, onEdit, isAdmin
       </div>
     </div>
 
-    {showPlaqueta && (
+    {isAdmin && showPlaqueta && (
       <PlaquetaPreview
         missionary={missionary}
         onClose={() => setShowPlaqueta(false)}
