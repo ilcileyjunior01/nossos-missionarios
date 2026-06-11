@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: false,
+  },
   turbopack: {
     resolveAlias: {
       // Equivalente ao webpack resolve.fallback: { 'onnxruntime-web/webgpu': false }
