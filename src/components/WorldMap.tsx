@@ -64,7 +64,12 @@ export default function WorldMap({ missionaries, filterStatus }: WorldMapProps) 
       ref={containerRef}
       className="w-full rounded-2xl overflow-hidden shadow-xl border border-amber-900/20 relative"
       style={{
-        background: 'linear-gradient(170deg, #06172e 0%, #0b3060 45%, #07203f 100%)',
+        backgroundImage: `
+          linear-gradient(rgba(6,23,46,0.72), rgba(7,32,63,0.78)),
+          url('https://news-sg.churchofjesuschrist.org/media/960x720/christus-jesus-christ-mormon.jpg')
+        `,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center 18%',
       }}
       onMouseMove={(e) => {
         if (!containerRef.current) return
@@ -139,8 +144,8 @@ export default function WorldMap({ missionaries, filterStatus }: WorldMapProps) 
 
           {/* Gradiente do oceano (rect de fundo) */}
           <radialGradient id="oceanGrad" cx="40%" cy="35%" r="65%">
-            <stop offset="0%" stopColor="#1565a8" stopOpacity="1" />
-            <stop offset="100%" stopColor="#06172e" stopOpacity="1" />
+            <stop offset="0%" stopColor="#1565a8" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="#06172e" stopOpacity="0.55" />
           </radialGradient>
         </defs>
 
