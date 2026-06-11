@@ -5,7 +5,15 @@ import { X, Upload, Loader2, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Missionary } from '@/types/missionary'
 import Image from 'next/image'
-import { removeBackground } from '@imgly/background-removal'
+// import dinâmico para evitar SSR com APIs de browser (WebWorker/WASM)
+let removeBackgroundFn: typeof import('@imgly/background-removal').removeBackground | null = null
+async function getRemoveBackground() {
+  if (!removeBackgroundFn) {
+    const mod = await import('@imgly/background-removal')
+    removeBackgroundFn = mod.removeBackground
+  }
+  return removeBackgroundFn
+}
 
 export type ModalSavedAction = 'created' | 'updated' | 'deleted'
 
@@ -57,6 +65,7 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
     try {
       // 1. Remoção de fundo via IA (modelos ONNX no browser)
       setPhotoStep('Removendo fundo...')
+      const removeBackground = await getRemoveBackground()
       const noBgBlob = await removeBackground(file, {
         model: 'isnet_fp16',
         device: 'cpu',
