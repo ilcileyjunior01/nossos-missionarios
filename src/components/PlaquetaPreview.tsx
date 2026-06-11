@@ -42,12 +42,19 @@ type Coord = number[]
 type Geometry = { type: string; coordinates: unknown }
 
 function getGeoBbox(geometry: Geometry): [[number, number], [number, number]] | null {
-  let flat: Coord[] = []
-  if (geometry.type === 'Polygon') flat = (geometry.coordinates as Coord[][]).flat()
-  else if (geometry.type === 'MultiPolygon') flat = (geometry.coordinates as Coord[][][]).flat(2)
-  if (!flat.length) return null
-  const lons = flat.map((c) => c[0])
-  const lats = flat.map((c) => c[1])
+  let coords: Coord[] = []
+  if (geometry.type === 'Polygon') {
+    // Só o anel externo
+    coords = (geometry.coordinates as Coord[][])[0]
+  } else if (geometry.type === 'MultiPolygon') {
+    // Usa o anel externo do maior polígono (mais pontos = território principal)
+    // Isso evita que Alasca/Havaí distorçam o bbox dos EUA, por exemplo
+    const rings = (geometry.coordinates as Coord[][][]).map((polygon) => polygon[0])
+    coords = rings.reduce((a, b) => (a.length >= b.length ? a : b))
+  }
+  if (!coords.length) return null
+  const lons = coords.map((c) => c[0])
+  const lats = coords.map((c) => c[1])
   return [[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]]
 }
 
@@ -330,8 +337,12 @@ export default function PlaquetaPreview({ missionary, nomeEstaca = NOME_ESTACA_P
                             const bbox = getGeoBbox(target.geometry as Geometry)
                             if (bbox) {
                               const [[west, south], [east, north]] = bbox
-                              const scaleW = (MAP_W * 0.80) / ((east - west)  * Math.PI / 180)
-                              const scaleH = (MAP_H * 0.80) / ((north - south) * Math.PI / 180)
+                              const scaleW = (MAP_W * 0.80) / ((east - west) * Math.PI / 180)
+                              // Altura correta no Mercator: integral do fator de escala vertical
+                              const northRad = north * Math.PI / 180
+                              const southRad = south * Math.PI / 180
+                              const mercH = Math.log(Math.tan(Math.PI / 4 + northRad / 2)) - Math.log(Math.tan(Math.PI / 4 + southRad / 2))
+                              const scaleH = (MAP_H * 0.80) / mercH
                               const center: [number, number] = [(west + east) / 2, (south + north) / 2]
                               fittedRef.current = true
                               setTimeout(() => {
@@ -342,29 +353,27 @@ export default function PlaquetaPreview({ missionary, nomeEstaca = NOME_ESTACA_P
                           }
                         }
 
-                        return geographies.map((geo) => {
-                          const name = getCountryName(geo.id as number)
-                          const isTarget = normalizedCountry && name
-                            ? normalize(name) === normalizedCountry
-                            : false
-                          return (
+                        return geographies
+                          .filter((geo) => {
+                            const name = getCountryName(geo.id as number)
+                            return normalizedCountry && name
+                              ? normalize(name) === normalizedCountry
+                              : false
+                          })
+                          .map((geo) => (
                             <Geography
                               key={geo.rsmKey}
                               geography={geo}
                               fill="transparent"
-                              stroke={isTarget ? '#a07828' : 'transparent'}
-                              strokeWidth={isTarget ? 1.5 : 0}
+                              stroke="#a07828"
+                              strokeWidth={1.5}
                               style={{
-                                default: {
-                                  outline: 'none',
-                                  filter: isTarget ? 'url(#borderShadow)' : 'none',
-                                },
+                                default: { outline: 'none', filter: 'url(#borderShadow)' },
                                 hover:   { outline: 'none' },
                                 pressed: { outline: 'none' },
                               }}
                             />
-                          )
-                        })
+                          ))
                       }}
                     </Geographies>
 
