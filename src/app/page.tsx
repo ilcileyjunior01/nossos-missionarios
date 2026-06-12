@@ -2,20 +2,20 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { UserPlus, Search, X } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase'
 import { Missionary, MissionaryStatus, SortOption } from '@/types/missionary'
 import { getMissionaryStatus } from '@/lib/missionary-status'
 import Header from '@/components/Header'
 import MissionaryCard from '@/components/MissionaryCard'
 import type { ModalSavedAction } from '@/components/MissionaryModal'
-const MissionaryModal = dynamic(() => import('@/components/MissionaryModal'))
-import dynamic from 'next/dynamic'
 import StatusCounter from '@/components/StatusCounter'
 import SortBar from '@/components/SortBar'
 import Toast, { ToastType } from '@/components/Toast'
 import { useAuth } from '@/contexts/AuthContext'
 import MissionaryCardSkeleton from '@/components/MissionaryCardSkeleton'
 
+const MissionaryModal = dynamic(() => import('@/components/MissionaryModal'))
 const MissionaryDetails = dynamic(() => import('@/components/MissionaryDetails'), { ssr: false })
 const WorldMap = dynamic(() => import('@/components/WorldMap'), { ssr: false })
 
