@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { UserPlus, Search, X } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase'
@@ -56,19 +57,41 @@ export default function Page() {
   const { user } = useAuth()
   const isAdmin = !!user
 
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+
   const [missionaries, setMissionaries] = useState<Missionary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [sort, setSort] = useState<SortOption>('cronologico')
+  const [sort, setSort] = useState<SortOption>(() => {
+    const s = searchParams.get('sort')
+    return (s === 'cronologico' || s === 'nome' || s === 'ala' || s === 'status') ? s : 'cronologico'
+  })
   const [modalOpen, setModalOpen] = useState(false)
   const [selected, setSelected] = useState<Missionary | null>(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [detailsMissionary, setDetailsMissionary] = useState<Missionary | null>(null)
-  const [search, setSearch] = useState('')
-  const [filterAla, setFilterAla] = useState('')
-  const [filterStatus, setFilterStatus] = useState<MissionaryStatus | null>(null)
+  const [search, setSearch] = useState(() => searchParams.get('q') ?? '')
+  const [filterAla, setFilterAla] = useState(() => searchParams.get('ala') ?? '')
+  const [filterStatus, setFilterStatus] = useState<MissionaryStatus | null>(() => {
+    const s = searchParams.get('status')
+    return (s === 'em_campo' || s === 'a_caminho' || s === 'retornou' || s === 'indefinido') ? s : null
+  })
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null)
-  const [showMap, setShowMap] = useState(false)
+  const [showMap, setShowMap] = useState(() => searchParams.get('mapa') === '1')
+
+  // Sincroniza filtros na URL
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (search) params.set('q', search)
+    if (filterAla) params.set('ala', filterAla)
+    if (filterStatus) params.set('status', filterStatus)
+    if (sort !== 'cronologico') params.set('sort', sort)
+    if (showMap) params.set('mapa', '1')
+    const query = params.toString()
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+  }, [search, filterAla, filterStatus, sort, showMap, pathname, router])
 
   const fetchMissionaries = useCallback(async () => {
     setLoading(true)
