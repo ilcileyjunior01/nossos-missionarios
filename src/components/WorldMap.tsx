@@ -160,7 +160,7 @@ export default function WorldMap({ missionaries }: WorldMapProps) {
                   if (!name || !containerRef.current) return
                   const rect = containerRef.current.getBoundingClientRect()
                   const normName = normalize(name)
-                  const missionaryNames = filtered
+                  const missionaryNames = missionaries
                     .filter((m) => m.pais_missao && normalize(m.pais_missao) === normName)
                     .map((m) => m.nome)
                   setTooltip({
