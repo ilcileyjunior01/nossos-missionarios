@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps'
 import { Missionary, MissionaryStatus } from '@/types/missionary'
+import { getMissionaryStatus, getMissionaryTimeLabel } from '@/lib/missionary-status'
 import { getCountryName } from '@/lib/countryNames'
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
@@ -19,11 +20,16 @@ interface WorldMapProps {
   filterStatus?: MissionaryStatus | null
 }
 
+interface TooltipItem {
+  nome: string
+  timeLabel: string
+}
+
 interface Tooltip {
   x: number
   y: number
   name: string
-  missionaryNames: string[]
+  items: TooltipItem[]
 }
 
 interface Cluster {
@@ -247,14 +253,17 @@ export default function WorldMap({ missionaries, onSelect, filterStatus }: World
                   if (!name || !containerRef.current) return
                   const rect = containerRef.current.getBoundingClientRect()
                   const normName = normalize(name)
-                  const missionaryNames = missionaries
+                  const items = missionaries
                     .filter((m) => m.pais_missao && normalize(m.pais_missao) === normName)
-                    .map((m) => m.nome)
+                    .map((m) => ({
+                      nome: m.nome,
+                      timeLabel: getMissionaryTimeLabel(m, getMissionaryStatus(m)),
+                    }))
                   setTooltip({
                     x: e.clientX - rect.left,
                     y: e.clientY - rect.top,
                     name,
-                    missionaryNames,
+                    items,
                   })
                 }}
                 onMouseLeave={() => setTooltip(null)}
@@ -278,7 +287,10 @@ export default function WorldMap({ missionaries, onSelect, filterStatus }: World
                   name: cluster.items.length === 1
                     ? cluster.items[0].pais_missao ?? ''
                     : `${cluster.items.length} missionários`,
-                  missionaryNames: cluster.items.map((m) => m.nome),
+                  items: cluster.items.map((m) => ({
+                    nome: m.nome,
+                    timeLabel: getMissionaryTimeLabel(m, getMissionaryStatus(m)),
+                  })),
                 })
               }}
               onMouseLeave={() => setTooltip(null)}
@@ -341,18 +353,23 @@ export default function WorldMap({ missionaries, onSelect, filterStatus }: World
           }}
         >
           <p className="font-semibold text-amber-300 whitespace-nowrap">{tooltip.name}</p>
-          {tooltip.missionaryNames.length > 0 && (
-            <ul className="mt-1.5 space-y-1">
-              {tooltip.missionaryNames.map((nome) => (
-                <li key={nome} className="text-amber-100/80 leading-tight flex items-center gap-1.5">
-                  <svg width="8" height="11" viewBox="0 0 8 11" className="shrink-0">
+          {tooltip.items.length > 0 && (
+            <ul className="mt-1.5 space-y-2">
+              {tooltip.items.map((item) => (
+                <li key={item.nome} className="leading-tight flex items-start gap-1.5">
+                  <svg width="8" height="11" viewBox="0 0 8 11" className="shrink-0 mt-0.5">
                     <path
                       d="M4 0C2.343 0 1 1.343 1 3c0 2.5 3 8 3 8s3-5.5 3-8C7 1.343 5.657 0 4 0z"
                       fill="#f0c040"
                     />
                     <text x="4" y="4.5" textAnchor="middle" fontSize="3.5" fill="#7a4e08" fontWeight="bold">★</text>
                   </svg>
-                  {nome}
+                  <span>
+                    <span className="text-amber-100/90">{item.nome}</span>
+                    {item.timeLabel && (
+                      <span className="block text-[10px] text-amber-400/70 mt-0.5">{item.timeLabel}</span>
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>
