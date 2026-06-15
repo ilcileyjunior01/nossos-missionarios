@@ -106,11 +106,13 @@ export default function MissionaryDetails({ missionary, onClose, onEdit, isAdmin
               {missionary.nome_missao && (
                 <InfoRow icon={<MapPin size={13} />} label="Missão" value={missionary.nome_missao} />
               )}
-              <InfoRow
-                icon={<Flag size={13} />}
-                label="Placa"
-                value={<PlacaBadge status={missionary.status_placa} />}
-              />
+              {isAdmin && (
+                <InfoRow
+                  icon={<Flag size={13} />}
+                  label="Placa"
+                  value={<PlacaBadge status={missionary.status_placa} />}
+                />
+              )}
             </div>
           </div>
         </div>

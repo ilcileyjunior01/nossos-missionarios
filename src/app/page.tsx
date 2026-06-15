@@ -5,7 +5,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { UserPlus, Search, X } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase'
-import { Missionary, MissionaryStatus, SortOption } from '@/types/missionary'
+import { Missionary, MissionaryStatus, PlacaStatus, SortOption } from '@/types/missionary'
 import { getMissionaryStatus } from '@/lib/missionary-status'
 import Header from '@/components/Header'
 import MissionaryCard from '@/components/MissionaryCard'
@@ -78,6 +78,10 @@ export default function Page() {
     const s = searchParams.get('status')
     return (s === 'em_campo' || s === 'a_caminho' || s === 'retornou' || s === 'indefinido') ? s : null
   })
+  const [filterPlaca, setFilterPlaca] = useState<PlacaStatus | null>(() => {
+    const s = searchParams.get('placa')
+    return (s === 'nao_enviado' || s === 'enviado' || s === 'impressa') ? s : null
+  })
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null)
   const [showMap, setShowMap] = useState(() => searchParams.get('mapa') === '1')
 
@@ -87,11 +91,12 @@ export default function Page() {
     if (search) params.set('q', search)
     if (filterAla) params.set('ala', filterAla)
     if (filterStatus) params.set('status', filterStatus)
+    if (filterPlaca) params.set('placa', filterPlaca)
     if (sort !== 'cronologico') params.set('sort', sort)
     if (showMap) params.set('mapa', '1')
     const query = params.toString()
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
-  }, [search, filterAla, filterStatus, sort, showMap, pathname, router])
+  }, [search, filterAla, filterStatus, filterPlaca, sort, showMap, pathname, router])
 
   const fetchMissionaries = useCallback(async () => {
     setLoading(true)
@@ -174,8 +179,11 @@ export default function Page() {
         })
       }
     }
+    if (filterPlaca) {
+      list = list.filter((m) => m.status_placa === filterPlaca)
+    }
     return list
-  }, [missionaries, sort, search, filterAla, filterStatus])
+  }, [missionaries, sort, search, filterAla, filterStatus, filterPlaca])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -265,6 +273,18 @@ export default function Page() {
                 <option key={a} value={a}>{a}</option>
               ))}
             </select>
+            {isAdmin && (
+              <select
+                value={filterPlaca ?? ''}
+                onChange={(e) => setFilterPlaca((e.target.value as PlacaStatus) || null)}
+                className="sm:w-52 px-4 py-2.5 text-sm border border-gray-200 rounded-full font-[family-name:var(--font-inter)] focus:outline-none focus:border-[#1a2744] transition-colors text-gray-600 bg-white"
+              >
+                <option value="">Todas as placas</option>
+                <option value="nao_enviado">Não enviado</option>
+                <option value="enviado">Enviado</option>
+                <option value="impressa">Impressa</option>
+              </select>
+            )}
           </div>
         )}
 
