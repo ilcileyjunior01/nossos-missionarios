@@ -9,6 +9,7 @@ const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
 
 interface WorldMapProps {
   missionaries: Missionary[]
+  onSelect: (missionary: Missionary) => void
 }
 
 interface Tooltip {
@@ -16,6 +17,17 @@ interface Tooltip {
   y: number
   name: string
   missionaryNames: string[]
+}
+
+interface Cluster {
+  coords: [number, number]
+  items: Missionary[]
+}
+
+interface Picker {
+  x: number
+  y: number
+  items: Missionary[]
 }
 
 function normalize(str: string) {
@@ -26,27 +38,43 @@ function normalize(str: string) {
     .trim()
 }
 
-
-export default function WorldMap({ missionaries }: WorldMapProps) {
+export default function WorldMap({ missionaries, onSelect }: WorldMapProps) {
   const [tooltip, setTooltip] = useState<Tooltip | null>(null)
+  const [picker, setPicker] = useState<Picker | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const markers = missionaries
+  // Agrupa missionários em clusters por proximidade de coordenadas
+  const clusters = missionaries
     .filter((m) => m.latitude != null && m.longitude != null)
-    .map((m) => ({
-      id: m.id,
-      nome: m.nome,
-      coords: [m.longitude!, m.latitude!] as [number, number],
-    }))
+    .reduce<Cluster[]>((acc, m) => {
+      const coords: [number, number] = [m.longitude!, m.latitude!]
+      const existing = acc.find(
+        (c) =>
+          Math.abs(c.coords[0] - coords[0]) < 0.5 &&
+          Math.abs(c.coords[1] - coords[1]) < 0.5
+      )
+      if (existing) {
+        existing.items.push(m)
+      } else {
+        acc.push({ coords, items: [m] })
+      }
+      return acc
+    }, [])
 
-  const unique = markers.reduce<typeof markers>((acc, cur) => {
-    const exists = acc.some(
-      (m) =>
-        Math.abs(m.coords[0] - cur.coords[0]) < 0.5 &&
-        Math.abs(m.coords[1] - cur.coords[1]) < 0.5
-    )
-    return exists ? acc : [...acc, cur]
-  }, [])
+  function handlePinClick(cluster: Cluster, e: React.MouseEvent) {
+    if (!containerRef.current) return
+    if (cluster.items.length === 1) {
+      setPicker(null)
+      onSelect(cluster.items[0])
+    } else {
+      const rect = containerRef.current.getBoundingClientRect()
+      setPicker({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+        items: cluster.items,
+      })
+    }
+  }
 
   return (
     <div
@@ -68,6 +96,12 @@ export default function WorldMap({ missionaries }: WorldMapProps) {
         }
       }}
       onMouseLeave={() => setTooltip(null)}
+      onClick={(e) => {
+        // Fecha picker se clicar fora
+        if (picker && !(e.target as Element).closest('[data-picker]')) {
+          setPicker(null)
+        }
+      }}
     >
       {/* Cabeçalho */}
       <div className="px-5 pt-4 pb-1 flex items-center justify-between">
@@ -77,9 +111,9 @@ export default function WorldMap({ missionaries }: WorldMapProps) {
         >
           Missionários no mundo
         </h2>
-        {unique.length > 0 && (
+        {clusters.length > 0 && (
           <span className="text-xs text-amber-400/70 font-[family-name:var(--font-inter)]">
-            {missionaries.length} {missionaries.length === 1 ? 'missionário' : 'missionários'} · {unique.length} {unique.length === 1 ? 'local' : 'locais'}
+            {missionaries.length} {missionaries.length === 1 ? 'missionário' : 'missionários'} · {clusters.length} {clusters.length === 1 ? 'local' : 'locais'}
           </span>
         )}
       </div>
@@ -176,9 +210,30 @@ export default function WorldMap({ missionaries }: WorldMapProps) {
           }
         </Geographies>
 
-        {unique.map((marker) => (
-          <Marker key={marker.id} coordinates={marker.coords}>
-            <g filter="url(#pinGlow)" transform="translate(-8, -20)">
+        {clusters.map((cluster, i) => (
+          <Marker key={i} coordinates={cluster.coords}>
+            <g
+              filter="url(#pinGlow)"
+              transform="translate(-8, -20)"
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={(e) => {
+                if (!containerRef.current) return
+                const rect = containerRef.current.getBoundingClientRect()
+                setTooltip({
+                  x: e.clientX - rect.left,
+                  y: e.clientY - rect.top,
+                  name: cluster.items.length === 1
+                    ? cluster.items[0].pais_missao ?? ''
+                    : `${cluster.items.length} missionários`,
+                  missionaryNames: cluster.items.map((m) => m.nome),
+                })
+              }}
+              onMouseLeave={() => setTooltip(null)}
+              onClick={(e) => {
+                e.stopPropagation()
+                handlePinClick(cluster, e)
+              }}
+            >
               <ellipse cx="8" cy="22" rx="4" ry="2" fill="rgba(0,0,0,0.35)" />
               <path
                 d="M8 0C4.686 0 2 2.686 2 6c0 4.418 6 12 6 12S14 10.418 14 6c0-3.314-2.686-6-6-6z"
@@ -186,28 +241,41 @@ export default function WorldMap({ missionaries }: WorldMapProps) {
                 stroke="#fff8e0"
                 strokeWidth="1"
               />
-              <text
-                x="8"
-                y="8"
-                textAnchor="middle"
-                fontSize="7"
-                fill="#7a4e08"
-                style={{ userSelect: 'none', fontWeight: 'bold' }}
-              >
-                ★
-              </text>
+              {cluster.items.length > 1 ? (
+                <text
+                  x="8"
+                  y="8"
+                  textAnchor="middle"
+                  fontSize="6"
+                  fill="#7a4e08"
+                  style={{ userSelect: 'none', fontWeight: 'bold' }}
+                >
+                  {cluster.items.length}
+                </text>
+              ) : (
+                <text
+                  x="8"
+                  y="8"
+                  textAnchor="middle"
+                  fontSize="7"
+                  fill="#7a4e08"
+                  style={{ userSelect: 'none', fontWeight: 'bold' }}
+                >
+                  ★
+                </text>
+              )}
             </g>
           </Marker>
         ))}
       </ComposableMap>
 
-      {markers.length === 0 && (
+      {missionaries.filter((m) => m.latitude != null).length === 0 && (
         <p className="text-center text-xs text-amber-400/50 font-[family-name:var(--font-inter)] pb-4">
           Nenhum missionário com localização cadastrada ainda.
         </p>
       )}
 
-      {/* Tooltip */}
+      {/* Tooltip de hover */}
       {tooltip && (
         <div
           className="pointer-events-none absolute z-10 px-3 py-2 rounded-lg text-xs font-[family-name:var(--font-inter)] shadow-lg"
@@ -236,6 +304,48 @@ export default function WorldMap({ missionaries }: WorldMapProps) {
               ))}
             </ul>
           )}
+        </div>
+      )}
+
+      {/* Picker para múltiplos missionários no mesmo pin */}
+      {picker && (
+        <div
+          data-picker
+          className="absolute z-20 rounded-xl text-xs font-[family-name:var(--font-inter)] shadow-2xl overflow-hidden"
+          style={{
+            left: Math.min(picker.x + 14, (containerRef.current?.offsetWidth ?? 400) - 220),
+            top: picker.y - 8,
+            background: 'rgba(6, 23, 46, 0.97)',
+            border: '1px solid rgba(184, 151, 42, 0.6)',
+            minWidth: '180px',
+            maxWidth: '220px',
+          }}
+        >
+          <p className="px-3 pt-2.5 pb-1.5 text-amber-400/70 text-[11px] uppercase tracking-wider border-b border-amber-900/40">
+            Selecionar missionário
+          </p>
+          <ul>
+            {picker.items.map((m) => (
+              <li key={m.id}>
+                <button
+                  className="w-full text-left px-3 py-2 text-amber-100 hover:bg-amber-900/40 transition-colors flex items-center gap-2"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setPicker(null)
+                    onSelect(m)
+                  }}
+                >
+                  <svg width="8" height="11" viewBox="0 0 8 11" className="shrink-0">
+                    <path
+                      d="M4 0C2.343 0 1 1.343 1 3c0 2.5 3 8 3 8s3-5.5 3-8C7 1.343 5.657 0 4 0z"
+                      fill="#f0c040"
+                    />
+                  </svg>
+                  {m.nome}
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
