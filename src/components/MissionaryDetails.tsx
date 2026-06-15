@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { X, Pencil, UserCircle, Calendar, MapPin, Flag, Award } from 'lucide-react'
-import { Missionary } from '@/types/missionary'
+import { Missionary, PlacaStatus } from '@/types/missionary'
 import { getMissionaryStatus, getMissionaryTimeLabel } from '@/lib/missionary-status'
 import StatusBadge from './StatusBadge'
 import MissionaryMap from './MissionaryMap'
@@ -106,6 +106,11 @@ export default function MissionaryDetails({ missionary, onClose, onEdit, isAdmin
               {missionary.nome_missao && (
                 <InfoRow icon={<MapPin size={13} />} label="Missão" value={missionary.nome_missao} />
               )}
+              <InfoRow
+                icon={<Flag size={13} />}
+                label="Placa"
+                value={<PlacaBadge status={missionary.status_placa} />}
+              />
             </div>
           </div>
         </div>
@@ -161,12 +166,27 @@ export default function MissionaryDetails({ missionary, onClose, onEdit, isAdmin
   )
 }
 
-function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center gap-1.5 text-xs font-[family-name:var(--font-inter)]">
       <span className="text-gray-400">{icon}</span>
       <span className="text-gray-400">{label}:</span>
       <span className="text-gray-700 font-medium truncate">{value}</span>
     </div>
+  )
+}
+
+const PLACA_CONFIG: Record<PlacaStatus, { label: string; className: string }> = {
+  nao_enviado: { label: 'Não enviado', className: 'bg-gray-100 text-gray-500 border-gray-200' },
+  enviado:     { label: 'Enviado',     className: 'bg-amber-50 text-amber-700 border-amber-200' },
+  impressa:    { label: 'Impressa',    className: 'bg-green-50 text-green-700 border-green-200' },
+}
+
+function PlacaBadge({ status }: { status: PlacaStatus }) {
+  const { label, className } = PLACA_CONFIG[status] ?? PLACA_CONFIG.nao_enviado
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-medium ${className}`}>
+      {label}
+    </span>
   )
 }

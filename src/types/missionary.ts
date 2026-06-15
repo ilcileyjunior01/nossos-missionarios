@@ -1,5 +1,7 @@
 export type MissionaryStatus = 'a_caminho' | 'em_campo' | 'retornou' | 'indefinido'
 
+export type PlacaStatus = 'nao_enviado' | 'enviado' | 'impressa'
+
 export interface Missionary {
   id: string
   nome: string
@@ -13,6 +15,7 @@ export interface Missionary {
   cidade_missao: string | null
   latitude: number | null
   longitude: number | null
+  status_placa: PlacaStatus
   created_at: string
   updated_at: string
 }

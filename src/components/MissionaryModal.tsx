@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { X, Upload, Loader2, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { Missionary } from '@/types/missionary'
+import { Missionary, PlacaStatus } from '@/types/missionary'
 import Image from 'next/image'
 // import dinâmico para evitar SSR com APIs de browser (WebWorker/WASM)
 let removeBackgroundFn: typeof import('@imgly/background-removal').removeBackground | null = null
@@ -50,6 +50,7 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
   const [deleting, setDeleting] = useState(false)
   const [processingPhoto, setProcessingPhoto] = useState(false)
   const [photoStep, setPhotoStep] = useState('')
+  const [statusPlaca, setStatusPlaca] = useState<PlacaStatus>(missionary?.status_placa ?? 'nao_enviado')
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitAttempted, setSubmitAttempted] = useState(false)
@@ -280,6 +281,7 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
         cidade_missao: cidadeMissao.trim() || null,
         latitude,
         longitude,
+        status_placa: statusPlaca,
       }
 
       if (isEdit) {
@@ -543,6 +545,34 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
             <p className="text-xs text-gray-400 mt-1 font-[family-name:var(--font-inter)]">
               Preencha apenas se o nome da missão não localizar corretamente no mapa
             </p>
+          </div>
+
+          {/* Status da placa */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 font-[family-name:var(--font-inter)] mb-1 uppercase tracking-wide">
+              Status da placa
+            </label>
+            <div className="flex gap-2">
+              {([
+                { value: 'nao_enviado', label: 'Não enviado', active: 'bg-gray-600 text-white border-gray-600', dot: 'bg-gray-400' },
+                { value: 'enviado',     label: 'Enviado',     active: 'bg-amber-500 text-white border-amber-500', dot: 'bg-amber-400' },
+                { value: 'impressa',    label: 'Impressa',    active: 'bg-green-600 text-white border-green-600', dot: 'bg-green-500' },
+              ] as const).map(({ value, label, active, dot }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setStatusPlaca(value)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-xs font-[family-name:var(--font-inter)] font-medium transition-colors ${
+                    statusPlaca === value
+                      ? active
+                      : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${statusPlaca === value ? 'bg-white/80' : dot}`} />
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Erro */}
