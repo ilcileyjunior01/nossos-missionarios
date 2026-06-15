@@ -1,15 +1,22 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps'
-import { Missionary } from '@/types/missionary'
+import { Missionary, MissionaryStatus } from '@/types/missionary'
 import { getCountryName } from '@/lib/countryNames'
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
 
+const STATUS_TITLE: Partial<Record<MissionaryStatus, string>> = {
+  em_campo:  'Em campo no mundo',
+  a_caminho: 'A caminho no mundo',
+  retornou:  'Retornaram no mundo',
+}
+
 interface WorldMapProps {
   missionaries: Missionary[]
   onSelect: (missionary: Missionary) => void
+  filterStatus?: MissionaryStatus | null
 }
 
 interface Tooltip {
@@ -38,10 +45,19 @@ function normalize(str: string) {
     .trim()
 }
 
-export default function WorldMap({ missionaries, onSelect }: WorldMapProps) {
+export default function WorldMap({ missionaries, onSelect, filterStatus }: WorldMapProps) {
   const [tooltip, setTooltip] = useState<Tooltip | null>(null)
   const [picker, setPicker] = useState<Picker | null>(null)
+  const [geoLoading, setGeoLoading] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    fetch(GEO_URL)
+      .then(() => setGeoLoading(false))
+      .catch(() => setGeoLoading(false))
+  }, [])
+
+  const title = (filterStatus && STATUS_TITLE[filterStatus]) ?? 'Missionários no mundo'
 
   // Agrupa missionários em clusters por proximidade de coordenadas
   const clusters = missionaries
@@ -109,7 +125,7 @@ export default function WorldMap({ missionaries, onSelect }: WorldMapProps) {
           className="text-base font-bold text-amber-300"
           style={{ fontFamily: 'var(--font-playfair)' }}
         >
-          Missionários no mundo
+          {title}
         </h2>
         {clusters.length > 0 && (
           <span className="text-xs text-amber-400/70 font-[family-name:var(--font-inter)]">
@@ -118,10 +134,47 @@ export default function WorldMap({ missionaries, onSelect }: WorldMapProps) {
         )}
       </div>
 
+      {/* Skeleton enquanto o GeoJSON carrega */}
+      {geoLoading && (
+        <div className="px-4 pb-4">
+          <div
+            className="w-full rounded-xl overflow-hidden relative"
+            style={{ paddingBottom: '50%', background: 'rgba(10,25,55,0.6)' }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="space-y-3 w-4/5">
+                {/* linhas simulando continentes */}
+                {[['60%', '15%'], ['80%', '30%'], ['45%', '50%'], ['70%', '65%'], ['35%', '80%']].map(([w, top], i) => (
+                  <div
+                    key={i}
+                    className="absolute h-3 rounded-full"
+                    style={{
+                      width: w,
+                      top,
+                      left: '10%',
+                      background: 'rgba(184,151,42,0.15)',
+                      animation: `pulse 1.8s ease-in-out ${i * 0.2}s infinite`,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(184,151,42,0.06) 50%, transparent 100%)',
+                animation: 'shimmer 2s linear infinite',
+                backgroundSize: '200% 100%',
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       <ComposableMap
         projection="geoNaturalEarth1"
         projectionConfig={{ scale: 153, center: [10, 0] }}
-        style={{ width: '100%', height: 'auto' }}
+        style={{ width: '100%', height: 'auto', display: geoLoading ? 'none' : undefined }}
       >
         <defs>
           {/* Gradiente das terras: ouro → bronze */}
