@@ -208,7 +208,7 @@ export default function Page() {
 
         {/* Mapa mundi */}
         {!loading && !error && showMap && (
-          <WorldMap missionaries={missionaries} filterStatus={filterStatus} />
+          <WorldMap missionaries={sorted} />
         )}
 
         {/* Busca e filtro por ala */}
