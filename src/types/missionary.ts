@@ -16,6 +16,7 @@ export interface Missionary {
   latitude: number | null
   longitude: number | null
   status_placa: PlacaStatus
+  eh_servico: boolean
   created_at: string
   updated_at: string
 }

@@ -51,6 +51,7 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
   const [processingPhoto, setProcessingPhoto] = useState(false)
   const [photoStep, setPhotoStep] = useState('')
   const [statusPlaca, setStatusPlaca] = useState<PlacaStatus>(missionary?.status_placa ?? 'nao_enviado')
+  const [ehServico, setEhServico] = useState(missionary?.eh_servico ?? false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitAttempted, setSubmitAttempted] = useState(false)
@@ -282,6 +283,7 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
         latitude,
         longitude,
         status_placa: statusPlaca,
+        eh_servico: ehServico,
       }
 
       if (isEdit) {
@@ -574,6 +576,19 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
               ))}
             </div>
           </div>
+
+            {/* Missionário de serviço */}
+          <label className="flex items-center gap-2.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={ehServico}
+              onChange={(e) => setEhServico(e.target.checked)}
+              className="w-4 h-4 accent-[#1a2744]"
+            />
+            <span className="text-sm text-gray-600 font-[family-name:var(--font-inter)]">
+              Missionário de serviço da Igreja
+            </span>
+          </label>
 
           {/* Erro */}
           {error && (

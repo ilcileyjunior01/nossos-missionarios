@@ -84,6 +84,7 @@ export default function Page() {
   })
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null)
   const [showMap, setShowMap] = useState(() => searchParams.get('mapa') === '1')
+  const [showServico, setShowServico] = useState(() => searchParams.get('servico') === '1')
 
   // Sincroniza filtros na URL
   useEffect(() => {
@@ -94,9 +95,10 @@ export default function Page() {
     if (filterPlaca) params.set('placa', filterPlaca)
     if (sort !== 'cronologico') params.set('sort', sort)
     if (showMap) params.set('mapa', '1')
+    if (showServico) params.set('servico', '1')
     const query = params.toString()
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
-  }, [search, filterAla, filterStatus, filterPlaca, sort, showMap, pathname, router])
+  }, [search, filterAla, filterStatus, filterPlaca, sort, showMap, showServico, pathname, router])
 
   const fetchMissionaries = useCallback(async () => {
     setLoading(true)
@@ -144,13 +146,25 @@ export default function Page() {
     setDetailsMissionary(null)
   }
 
+  const isServico = useCallback((m: Missionary) => m.eh_servico === true, [])
+
+  const servicoCount = useMemo(
+    () => missionaries.filter(isServico).length,
+    [missionaries, isServico]
+  )
+
+  const baseMissionaries = useMemo(
+    () => showServico ? missionaries : missionaries.filter((m) => !isServico(m)),
+    [missionaries, showServico, isServico]
+  )
+
   const alas = useMemo(() => {
-    const set = new Set(missionaries.map((m) => m.ala))
+    const set = new Set(baseMissionaries.map((m) => m.ala))
     return Array.from(set).sort((a, b) => a.localeCompare(b, 'pt-BR'))
-  }, [missionaries])
+  }, [baseMissionaries])
 
   const sorted = useMemo(() => {
-    let list = sortMissionaries(missionaries, sort)
+    let list = sortMissionaries(baseMissionaries, sort)
     if (search.trim()) {
       const q = search.trim().toLowerCase()
       list = list.filter((m) => m.nome.toLowerCase().includes(q))
@@ -183,7 +197,7 @@ export default function Page() {
       list = list.filter((m) => m.status_placa === filterPlaca)
     }
     return list
-  }, [missionaries, sort, search, filterAla, filterStatus, filterPlaca])
+  }, [baseMissionaries, sort, search, filterAla, filterStatus, filterPlaca])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -231,7 +245,7 @@ export default function Page() {
         {/* Contadores de status */}
         {!loading && !error && (
           <StatusCounter
-            missionaries={missionaries}
+            missionaries={baseMissionaries}
             filterStatus={filterStatus}
             onFilterStatus={setFilterStatus}
           />
@@ -286,6 +300,19 @@ export default function Page() {
               </select>
             )}
           </div>
+        )}
+
+        {/* Filtro de serviço */}
+        {!loading && !error && servicoCount > 0 && (
+          <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer select-none w-fit font-[family-name:var(--font-inter)]">
+            <input
+              type="checkbox"
+              checked={showServico}
+              onChange={(e) => setShowServico(e.target.checked)}
+              className="w-4 h-4 accent-[#1a2744]"
+            />
+            Incluir missionários de serviço da Igreja ({servicoCount})
+          </label>
         )}
 
         {/* Barra de ações */}

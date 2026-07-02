@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { LogIn, LogOut, Shield } from 'lucide-react'
+import { LogIn, LogOut, Shield, Download } from 'lucide-react'
+import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import LoginModal from './LoginModal'
 
@@ -103,6 +104,14 @@ export default function Header() {
                     <Shield size={11} />
                     Líder
                   </span>
+                  <Link
+                    href="/importar"
+                    className="flex items-center gap-1.5 text-[11px] text-white/70 hover:text-[#f0d97a] font-[family-name:var(--font-inter)] transition-colors"
+                    title="Importar missionários do LCR"
+                  >
+                    <Download size={12} />
+                    Importar LCR
+                  </Link>
                   <button
                     onClick={signOut}
                     className="flex items-center gap-1.5 text-[11px] text-white/70 hover:text-white font-[family-name:var(--font-inter)] transition-colors"
