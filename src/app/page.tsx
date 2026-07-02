@@ -146,7 +146,7 @@ export default function Page() {
     setDetailsMissionary(null)
   }
 
-  const isServico = useCallback((m: Missionary) => m.eh_servico === true, [])
+  const isServico = useCallback((m: Missionary) => !!m.eh_servico, [])
 
   const servicoCount = useMemo(
     () => missionaries.filter(isServico).length,
