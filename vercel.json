@@ -4,5 +4,10 @@
     "env": {
       "NODE_VERSION": "20"
     }
-  }
+  },
+  "crons": [
+    { "path": "/api/ping", "schedule": "0 8 * * *" },
+    { "path": "/api/ping", "schedule": "0 14 * * *" },
+    { "path": "/api/ping", "schedule": "0 20 * * *" }
+  ]
 }
