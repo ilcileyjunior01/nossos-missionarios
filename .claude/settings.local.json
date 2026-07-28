@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(cmd /c \"taskkill /IM node.exe /F\")",
+      "Bash(cmd:*)",
+      "Bash(npx next:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node -e \"const l = require\\('lucide-react'\\); console.log\\('Trash2' in l, 'Upload' in l, 'Loader2' in l, 'X' in l\\)\")",
+      "Bash(npm --version)",
+      "Bash(npm install:*)",
+      "Bash(vercel --version)",
+      "Bash(vercel login:*)",
+      "Bash(vercel --prod --yes)",
+      "Bash(ls:*)",
+      "Bash(vercel env:*)",
+      "Bash(node -e ':*)",
+      "Bash(curl:*)",
+      "Bash(grep -oP '\"https://[^\"]{10,}\"')",
+      "Bash(grep -oP 'createClient\\\\\\([^\\)]{5,50}\\\\\\)')",
+      "Bash(curl -s \"https://nossos-missionarios.vercel.app/_next/static/chunks/445-150754ea8eec410c.js\")",
+      "Bash(node:*)",
+      "Bash(vercel logs:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(vercel:*)",
+      "Bash(netstat -ano)",
+      "Bash(git push:*)",
+      "Bash(xargs grep:*)",
+      "Bash(npm list:*)",
+      "Bash(npm uninstall:*)"
+    ]
+  }
+}
