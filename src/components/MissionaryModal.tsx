@@ -262,7 +262,8 @@ export default function MissionaryModal({ missionary, onClose, onSaved }: Missio
         cidadeMissao.trim() !== (missionary?.cidade_missao ?? '') ||
         nomeMissao.trim() !== (missionary?.nome_missao ?? '') ||
         paisMissao.trim() !== (missionary?.pais_missao ?? '')
-      if (!isEdit ? true : locChanged) {
+      const missingCoords = !missionary?.latitude || !missionary?.longitude
+      if (!isEdit ? true : locChanged || missingCoords) {
         const coords = await resolveCoords()
         if (coords) {
           latitude = coords.lat
