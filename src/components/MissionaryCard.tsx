@@ -5,6 +5,7 @@ import { Missionary } from '@/types/missionary'
 import { getMissionaryStatus, getMissionaryTimeLabel, isReturningSoon, getDaysUntilReturn, getMissionProgress } from '@/lib/missionary-status'
 import StatusBadge from './StatusBadge'
 import { MapPin, Bell } from 'lucide-react'
+import { getCountryFlagUrl } from '@/lib/countryNames'
 
 interface MissionaryCardProps {
   missionary: Missionary
@@ -136,7 +137,14 @@ export default function MissionaryCard({ missionary, onClick, index = 0 }: Missi
                 </p>
               )}
               {missionary.pais_missao && (
-                <p className="text-xs text-gray-400 font-[family-name:var(--font-inter)] truncate leading-tight">
+                <p className="text-xs text-gray-400 font-[family-name:var(--font-inter)] truncate leading-tight flex items-center gap-1">
+                  {(() => {
+                    const url = getCountryFlagUrl(missionary.pais_missao)
+                    return url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={url} alt="" width={26} height={19} className="inline shrink-0 rounded-sm shadow-sm" />
+                    ) : null
+                  })()}
                   {missionary.pais_missao}
                 </p>
               )}

@@ -39,3 +39,158 @@ export function getCountryName(numericId: number | string): string {
     return alpha2
   }
 }
+
+// Remove acentos para comparação tolerante a variações de digitação
+function normalize(s: string): string {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+}
+
+// Mapa estático: nome normalizado (sem acento, minúsculo) → alpha-2
+// Inclui nomes gerados pelo bookmarklet, nomes do Intl.DisplayNames pt-BR e variações comuns
+const PT_NAME_TO_A2: Record<string, string> = {
+  // América do Sul
+  'argentina': 'AR',
+  'bolivia': 'BO',
+  'brasil': 'BR',
+  'brazil': 'BR',
+  'chile': 'CL',
+  'colombia': 'CO',
+  'equador': 'EC',
+  'ecuador': 'EC',
+  'guiana': 'GY',
+  'guiana francesa': 'GF',
+  'paraguai': 'PY',
+  'paraguay': 'PY',
+  'peru': 'PE',
+  'suriname': 'SR',
+  'uruguai': 'UY',
+  'uruguay': 'UY',
+  'venezuela': 'VE',
+  // América do Norte e Central
+  'canada': 'CA',
+  'estados unidos': 'US',
+  'eua': 'US',
+  'usa': 'US',
+  'mexico': 'MX',
+  'belize': 'BZ',
+  'costa rica': 'CR',
+  'el salvador': 'SV',
+  'guatemala': 'GT',
+  'honduras': 'HN',
+  'nicaragua': 'NI',
+  'panama': 'PA',
+  // Caribe
+  'cuba': 'CU',
+  'haiti': 'HT',
+  'jamaica': 'JM',
+  'republica dominicana': 'DO',
+  'porto rico': 'PR',
+  'trinidad e tobago': 'TT',
+  // Europa
+  'alemanha': 'DE',
+  'austria': 'AT',
+  'belgica': 'BE',
+  'bulgaria': 'BG',
+  'croacia': 'HR',
+  'eslovaquia': 'SK',
+  'eslovenia': 'SI',
+  'espanha': 'ES',
+  'estonia': 'EE',
+  'finlandia': 'FI',
+  'franca': 'FR',
+  'grecia': 'GR',
+  'hungria': 'HU',
+  'irlanda': 'IE',
+  'italia': 'IT',
+  'letonia': 'LV',
+  'lituania': 'LT',
+  'luxemburgo': 'LU',
+  'malta': 'MT',
+  'noruega': 'NO',
+  'paises baixos': 'NL',
+  'holanda': 'NL',
+  'polonia': 'PL',
+  'portugal': 'PT',
+  'reino unido': 'GB',
+  'inglaterra': 'GB',
+  'romenia': 'RO',
+  'russia': 'RU',
+  'suecia': 'SE',
+  'suica': 'CH',
+  'ucrania': 'UA',
+  // Asia
+  'bangladesh': 'BD',
+  'camboja': 'KH',
+  'china': 'CN',
+  'coreia': 'KR',
+  'coreia do sul': 'KR',
+  'coreia do norte': 'KP',
+  'filipinas': 'PH',
+  'india': 'IN',
+  'indonesia': 'ID',
+  'japao': 'JP',
+  'japão': 'JP',
+  'malasia': 'MY',
+  'mongolia': 'MN',
+  'myanmar': 'MM',
+  'nepal': 'NP',
+  'paquistao': 'PK',
+  'sri lanka': 'LK',
+  'tailandia': 'TH',
+  'taiwan': 'TW',
+  'timor-leste': 'TL',
+  'timor leste': 'TL',
+  'vietna': 'VN',
+  // Oriente Médio
+  'arabia saudita': 'SA',
+  'emirados arabes unidos': 'AE',
+  'israel': 'IL',
+  'jordania': 'JO',
+  'kuwait': 'KW',
+  'libano': 'LB',
+  'qatar': 'QA',
+  'turquia': 'TR',
+  // África
+  'africa do sul': 'ZA',
+  'angola': 'AO',
+  'cabo verde': 'CV',
+  'camaroes': 'CM',
+  'ethiopia': 'ET',
+  'etiopia': 'ET',
+  'gana': 'GH',
+  'ghana': 'GH',
+  'kenya': 'KE',
+  'quenia': 'KE',
+  'madagascar': 'MG',
+  'malawi': 'MW',
+  'mocambique': 'MZ',
+  'nigeria': 'NG',
+  'senegal': 'SN',
+  'tanzania': 'TZ',
+  'uganda': 'UG',
+  'zimbabue': 'ZW',
+  // Oceania
+  'australia': 'AU',
+  'fiji': 'FJ',
+  'nova zelandia': 'NZ',
+  'papua nova guine': 'PG',
+  'samoa': 'WS',
+  'tonga': 'TO',
+  'vanuatu': 'VU',
+}
+
+/** Retorna o código alpha-2 em minúsculo (ex: "br", "us") ou null se não encontrado. */
+export function getCountryAlpha2(portugueseName: string | null | undefined): string | null {
+  if (!portugueseName) return null
+  const a2 = PT_NAME_TO_A2[normalize(portugueseName)]
+  return a2 ? a2.toLowerCase() : null
+}
+
+/**
+ * Retorna a URL da bandeira no flagcdn.com (20 px de largura).
+ * Use em <img src={...} /> — não requer configuração no next.config.ts.
+ */
+export function getCountryFlagUrl(portugueseName: string | null | undefined): string | null {
+  const a2 = getCountryAlpha2(portugueseName)
+  return a2 ? `https://flagcdn.com/w20/${a2}.png` : null
+}

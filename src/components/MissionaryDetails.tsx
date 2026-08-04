@@ -8,6 +8,7 @@ import { getMissionaryStatus, getMissionaryTimeLabel } from '@/lib/missionary-st
 import StatusBadge from './StatusBadge'
 import MissionaryMap from './MissionaryMap'
 import PlaquetaPreview from './PlaquetaPreview'
+import { getCountryFlagUrl } from '@/lib/countryNames'
 
 interface MissionaryDetailsProps {
   missionary: Missionary
@@ -101,7 +102,22 @@ export default function MissionaryDetails({ missionary, onClose, onEdit, isAdmin
                 value={formatDate(missionary.data_termino)}
               />
               {missionary.pais_missao && (
-                <InfoRow icon={<MapPin size={13} />} label="País" value={missionary.pais_missao} />
+                <InfoRow
+                  icon={<MapPin size={13} />}
+                  label="País"
+                  value={
+                    <span className="flex items-center gap-1.5">
+                      {(() => {
+                        const url = getCountryFlagUrl(missionary.pais_missao)
+                        return url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={url} alt="" width={28} height={21} className="inline shrink-0 rounded-sm shadow-sm" />
+                        ) : null
+                      })()}
+                      {missionary.pais_missao}
+                    </span>
+                  }
+                />
               )}
               {missionary.nome_missao && (
                 <InfoRow icon={<MapPin size={13} />} label="Missão" value={missionary.nome_missao} />
