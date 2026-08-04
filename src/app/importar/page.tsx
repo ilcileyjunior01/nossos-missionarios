@@ -81,7 +81,8 @@ function sa(a){return(a||'').trim().replace(/^(ala|ramo)\\s+/i,'').trim();}
 function mr(r){
   var nm=r.missionName||r.nomeMissao||r.mission||null;
   var simp=sm(nm);
-  return{nome:nn(r.name||r.nome||r.fullName||r.preferredName||r.nameOrder||''),ala:sa(r.homeUnitName||r.unitName||r.ala||r.ward||r.nomeUnidade||''),genero:r.gender==='MALE'||r.gender==='M'?'M':r.gender==='FEMALE'||r.gender==='F'?'F':null,data_inicio:nd(r.startDate||r.callingDate||r.dataInicio||r.iniciadoEm||r.beginDate),data_termino:nd(r.expectedReturnDate||r.returnDate||r.endDate||r.fimEsperado||r.dataTermino),nome_missao:simp,pais_missao:ec(nm),cidade_missao:ct(nm),eh_servico:isServ(nm,simp),foto_url:null,latitude:null,longitude:null,status_placa:'nao_enviado'};
+  var serv=isServ(nm,simp);
+  return{nome:nn(r.name||r.nome||r.fullName||r.preferredName||r.nameOrder||''),ala:sa(r.homeUnitName||r.unitName||r.ala||r.ward||r.nomeUnidade||''),genero:r.gender==='MALE'||r.gender==='M'?'M':r.gender==='FEMALE'||r.gender==='F'?'F':null,data_inicio:nd(r.startDate||r.callingDate||r.dataInicio||r.iniciadoEm||r.beginDate),data_termino:nd(r.expectedReturnDate||r.returnDate||r.endDate||r.fimEsperado||r.dataTermino),nome_missao:simp,pais_missao:serv?'Brasil':ec(nm),cidade_missao:ct(nm),eh_servico:serv,foto_url:null,latitude:null,longitude:null,status_placa:'nao_enviado'};
 }
 function tryDom(){
   var HM={nome:['nome','name'],miss:['missão','missao','mission'],ini:['iniciou','início','inicio','start','mtc','chamada'],ret:['fim esperado','retorno','término','termino','return','release'],ala:['unidade atual','unidade','ward','congregação','branch']};
