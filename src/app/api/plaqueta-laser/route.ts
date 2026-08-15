@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
   // ── Saída PNG (padrão — raster laser) ──
   if (format !== 'svg') {
     const nome = id ? `plaqueta-laser-${id}.png` : 'plaqueta-laser.png'
-    return new Response(bwPng, {
+    return new Response(new Uint8Array(bwPng), {
       headers: {
         'Content-Type': 'image/png',
         'Content-Disposition': `attachment; filename="${nome}"`,

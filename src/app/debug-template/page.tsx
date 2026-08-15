@@ -54,7 +54,7 @@ export default function DebugTemplate() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   const mnW = p.mnW
-  const coords: [number, number] = [p.lon, p.lat]
+  const coords: [number, number] = [MOCK.lon, MOCK.lat]
 
   const code = `// Coordenadas calibradas
 const PHOTO_L = ${p.photoL}

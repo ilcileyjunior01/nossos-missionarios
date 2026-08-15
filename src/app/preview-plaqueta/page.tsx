@@ -18,6 +18,7 @@ const mock: Missionary = {
   longitude: -38.5014,
   status_placa: 'nao_enviado',
   eh_servico: false,
+  plaqueta_laser_url: null,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
 }
