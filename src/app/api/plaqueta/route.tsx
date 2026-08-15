@@ -15,7 +15,7 @@ const W = 390, H = 540
 
 // ── Posições calibradas ──────────────────────────────────────────────────────
 const PHOTO_L = 36,  PHOTO_T = 43,  PHOTO_W = 151, PHOTO_H = 274
-const RC      = 160, MN_T    = 80
+const MN_T    = 80
 const NAME_L  = PHOTO_L, NAME_T  = 333
 const MAP_L   = 208, MAP_T   = 329, MAP_W   = 151, MAP_H   = 138
 const FLAG_T  = 475
@@ -62,11 +62,11 @@ function projectBrazil(lon: number, lat: number, w: number, h: number): [number,
   ]
 }
 
+// Gera SVG string do Brasil (para usar como img src data URL no satori)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function geojsonToSvg(geoJson: any, w: number, h: number, markerLon?: number, markerLat?: number): string {
-  const features = geoJson.features ?? []
-  let paths = ''
-  for (const feature of features) {
+function brazilToSvg(geoJson: any, w: number, h: number, markerXY?: [number, number]): string {
+  let pathsStr = ''
+  for (const feature of geoJson.features ?? []) {
     const { type, coordinates } = feature.geometry
     const rings: number[][][] =
       type === 'Polygon'      ? coordinates :
@@ -76,17 +76,18 @@ function geojsonToSvg(geoJson: any, w: number, h: number, markerLon?: number, ma
         const [x, y] = projectBrazil(lon, lat, w, h)
         return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
       }).join(' ') + ' Z'
-      paths += `<path d="${d}" fill="#e8e8e8" stroke="#777" stroke-width="0.6"/>`
+      pathsStr += `<path d="${d}" fill="#e8e8e8" stroke="#777" stroke-width="0.6"/>`
     }
   }
-  if (markerLon != null && markerLat != null) {
-    const [mx, my] = projectBrazil(markerLon, markerLat, w, h)
-    paths += `
-      <ellipse cx="${mx}" cy="${my+13}" rx="3" ry="1.5" fill="rgba(0,0,0,0.25)"/>
-      <path d="M${mx} ${my-13}C${mx-2.1} ${my-13} ${mx-3.8} ${my-11.2} ${mx-3.8} ${my-9}c0 2.9 3.8 8 3.8 8s3.8-5.1 3.8-8c0-2.2-1.7-4-3.8-4z" fill="#1a56db"/>
-      <circle cx="${mx}" cy="${my-9}" r="1.7" fill="white"/>`
+  let markerStr = ''
+  if (markerXY) {
+    const [mx, my] = markerXY
+    markerStr = `
+      <ellipse cx="${mx}" cy="${my+5}" rx="3" ry="1.5" fill="rgba(0,0,0,0.25)"/>
+      <path d="M${mx} ${my-8}C${mx-2.1} ${my-8} ${mx-3.8} ${my-6.2} ${mx-3.8} ${my-4}c0 2.9 3.8 8 3.8 8s3.8-5.1 3.8-8c0-2.2-1.7-4-3.8-4z" fill="#1a56db"/>
+      <circle cx="${mx}" cy="${my-4}" r="1.7" fill="white"/>`
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${paths}</svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" fill="white"/>${pathsStr}${markerStr}</svg>`
 }
 
 // ── Mapa Mundial ──────────────────────────────────────────────────────────────
@@ -94,6 +95,7 @@ function mercYGen(lat: number) {
   return Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))
 }
 
+// Gera SVG string de um país do mundo (para usar como img src data URL no satori)
 function worldCountrySvg(
   targetAlpha2: string,
   w: number, h: number,
@@ -117,7 +119,6 @@ function worldCountrySvg(
 
   if (!countryFeat) return ''
 
-  // Calcular bounding box
   const allCoords: number[][] = []
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function collectCoords(geom: any) {
@@ -125,7 +126,6 @@ function worldCountrySvg(
     else if (geom.type === 'MultiPolygon') geom.coordinates.flat(2).forEach((c: number[]) => allCoords.push(c))
   }
   collectCoords(countryFeat.geometry)
-
   if (!allCoords.length) return ''
 
   const lons = allCoords.map(c => c[0])
@@ -146,31 +146,30 @@ function worldCountrySvg(
     ]
   }
 
-  // Gerar paths
   const geom = countryFeat.geometry
   const rings: number[][][] =
     geom.type === 'Polygon'      ? geom.coordinates :
     geom.type === 'MultiPolygon' ? geom.coordinates.flat(1) : []
 
-  let paths = ''
+  let pathsStr = ''
   for (const ring of rings) {
     const d = ring.map((c: number[], i: number) => {
       const [x, y] = proj(c[0], c[1])
       return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
     }).join(' ') + ' Z'
-    paths += `<path d="${d}" fill="#e8e8e8" stroke="#777" stroke-width="0.8"/>`
+    pathsStr += `<path d="${d}" fill="#e8e8e8" stroke="#777" stroke-width="0.6"/>`
   }
 
-  // Marcador
+  let markerStr = ''
   if (markerLon != null && markerLat != null) {
     const [mx, my] = proj(markerLon, markerLat)
-    paths += `
-      <ellipse cx="${mx}" cy="${my+13}" rx="3" ry="1.5" fill="rgba(0,0,0,0.25)"/>
-      <path d="M${mx} ${my-13}C${mx-2.1} ${my-13} ${mx-3.8} ${my-11.2} ${mx-3.8} ${my-9}c0 2.9 3.8 8 3.8 8s3.8-5.1 3.8-8c0-2.2-1.7-4-3.8-4z" fill="#1a56db"/>
-      <circle cx="${mx}" cy="${my-9}" r="1.7" fill="white"/>`
+    markerStr = `
+      <ellipse cx="${mx}" cy="${my+5}" rx="3" ry="1.5" fill="rgba(0,0,0,0.25)"/>
+      <path d="M${mx} ${my-8}C${mx-2.1} ${my-8} ${mx-3.8} ${my-6.2} ${mx-3.8} ${my-4}c0 2.9 3.8 8 3.8 8s3.8-5.1 3.8-8c0-2.2-1.7-4-3.8-4z" fill="#1a56db"/>
+      <circle cx="${mx}" cy="${my-4}" r="1.7" fill="white"/>`
   }
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${paths}</svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" fill="white"/>${pathsStr}${markerStr}</svg>`
 }
 
 // ── Handler ──────────────────────────────────────────────────────────────────
@@ -223,16 +222,28 @@ export async function GET(request: NextRequest) {
   const templateBuf = fs.readFileSync(path.join(process.cwd(), 'public', 'template-plaqueta.jpg'))
   const templateB64 = toB64(templateBuf, 'image/jpeg')
 
-  // ── Mapa ──
+  // ── Mapa (SVG → PNG via sharp → base64 → img src) ──
   let mapB64: string | null = null
+
   if (isBrazil) {
-    const statesRaw = fs.readFileSync(path.join(process.cwd(), 'public', 'brazil-states.json'), 'utf-8')
-    const statesJson = JSON.parse(statesRaw)
-    const svg = geojsonToSvg(statesJson, MAP_W, MAP_H, lon ?? undefined, lat ?? undefined)
-    mapB64 = toB64(Buffer.from(svg), 'image/svg+xml')
+    try {
+      const statesJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public', 'brazil-states.json'), 'utf-8'))
+      const markerXY = (lon != null && lat != null) ? projectBrazil(lon, lat, MAP_W, MAP_H) : undefined
+      const svg = brazilToSvg(statesJson, MAP_W, MAP_H, markerXY)
+      const png = await sharp(Buffer.from(svg)).png().toBuffer()
+      mapB64 = toB64(png, 'image/png')
+    } catch { /* sem mapa */ }
   } else if (alpha2) {
-    const svg = worldCountrySvg(alpha2, MAP_W, MAP_H, lon ?? undefined, lat ?? undefined)
-    if (svg) mapB64 = toB64(Buffer.from(svg), 'image/svg+xml')
+    try {
+      const svg = worldCountrySvg(alpha2, MAP_W, MAP_H,
+        lon != null ? lon : undefined,
+        lat != null ? lat : undefined,
+      )
+      if (svg) {
+        const png = await sharp(Buffer.from(svg)).png().toBuffer()
+        mapB64 = toB64(png, 'image/png')
+      }
+    } catch { /* sem mapa */ }
   }
 
   // ── Bandeira ──
@@ -324,7 +335,7 @@ export async function GET(request: NextRequest) {
           </span>
         </div>
 
-        {/* ── Mapa ── */}
+        {/* ── Mapa (SVG via img src data URL) ── */}
         {mapB64 && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={mapB64} width={MAP_W} height={MAP_H}

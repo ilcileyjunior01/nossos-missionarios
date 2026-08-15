@@ -80,18 +80,42 @@ export default function PlaquetaSatoriPage() {
         />
       </div>
 
-      {/* Botão download */}
-      <a
-        href={imgSrc}
-        download={`plaqueta-${selectedId || 'preview'}.png`}
-        style={{
-          background: '#b8972a', color: '#fff', borderRadius: 8,
-          padding: '8px 24px', fontSize: 14, textDecoration: 'none',
-          fontWeight: 600,
-        }}
-      >
-        Baixar PNG
-      </a>
+      {/* Botões download */}
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+        <a
+          href={imgSrc}
+          download={`plaqueta-${selectedId || 'preview'}.png`}
+          style={{
+            background: '#b8972a', color: '#fff', borderRadius: 8,
+            padding: '8px 24px', fontSize: 14, textDecoration: 'none',
+            fontWeight: 600,
+          }}
+        >
+          Baixar PNG
+        </a>
+        <a
+          href={`/api/plaqueta-laser${selectedId ? `?id=${selectedId}` : ''}`}
+          download={`plaqueta-laser-${selectedId || 'preview'}.png`}
+          style={{
+            background: '#222', color: '#fff', borderRadius: 8,
+            padding: '8px 24px', fontSize: 14, textDecoration: 'none',
+            fontWeight: 600, border: '1px solid #555',
+          }}
+        >
+          ⚫ Exportar Laser (PNG)
+        </a>
+        <a
+          href={`/api/plaqueta-laser${selectedId ? `?id=${selectedId}` : ''}&format=svg`}
+          download={`plaqueta-laser-${selectedId || 'preview'}.svg`}
+          style={{
+            background: '#222', color: '#aaa', borderRadius: 8,
+            padding: '8px 24px', fontSize: 14, textDecoration: 'none',
+            fontWeight: 600, border: '1px solid #444',
+          }}
+        >
+          ⚫ Exportar Laser (SVG)
+        </a>
+      </div>
     </div>
   )
 }

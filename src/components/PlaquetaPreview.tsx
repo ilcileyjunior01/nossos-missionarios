@@ -2,10 +2,11 @@
 
 import { useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
-import { X, Printer, UserCircle, Download } from 'lucide-react'
+import { X, Printer, UserCircle, Download, Zap, Upload, CheckCircle } from 'lucide-react'
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps'
 import { Missionary } from '@/types/missionary'
 import { getCountryAlpha2, getCountryName } from '@/lib/countryNames'
+import { supabase } from '@/lib/supabase'
 
 const BRAZIL_STATES_URL = '/brazil-states.json'
 const WORLD_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
@@ -94,7 +95,45 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
     return `${pais} ${nome}`
   })()
 
-  const [laserMode,  setLaserMode]  = useState(false)
+  const [laserMode,   setLaserMode]   = useState(false)
+  const [laserUrl,    setLaserUrl]    = useState<string | null>(missionary.plaqueta_laser_url ?? null)
+  const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'done' | 'error'>('idle')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleLaserUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadState('uploading')
+
+    try {
+      const ext  = file.name.toLowerCase().endsWith('.svg') ? 'svg' : 'png'
+      const path = `laser/${missionary.id}.${ext}`
+
+      const { error: uploadErr } = await supabase.storage
+        .from('fotos-missionarios')
+        .upload(path, file, { upsert: true, contentType: file.type })
+      if (uploadErr) throw uploadErr
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('fotos-missionarios')
+        .getPublicUrl(path)
+
+      const { error: updateErr } = await supabase
+        .from('missionaries')
+        .update({ plaqueta_laser_url: publicUrl })
+        .eq('id', missionary.id)
+      if (updateErr) throw updateErr
+
+      setLaserUrl(publicUrl)
+      setUploadState('done')
+    } catch (err) {
+      console.error('Erro no upload laser:', err)
+      setUploadState('error')
+    } finally {
+      // reset input para permitir re-upload do mesmo arquivo
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }, [missionary.id])
   const [projCenter, setProjCenter] = useState<[number, number]>(
     isBrazil ? [-51, -14] : (hasCoords ? coords : [0, 0])
   )
@@ -119,6 +158,15 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
   return (
     <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
 
+      {/* ── Input oculto para upload laser ── */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/svg+xml"
+        className="hidden"
+        onChange={handleLaserUpload}
+      />
+
       {/* ── Controles ── */}
       <div className="absolute top-4 right-4 flex flex-wrap gap-2 print:hidden">
         <button
@@ -141,6 +189,38 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
         >
           <Printer size={15} /> Imprimir
         </button>
+        <a
+          href={`/api/plaqueta-laser?id=${missionary.id}`}
+          download={`plaqueta-laser-${missionary.nome.replace(/\s+/g, '-')}.png`}
+          className="flex items-center gap-2 bg-gray-900 hover:bg-black text-white rounded-full px-4 py-2 text-sm font-medium font-[family-name:var(--font-inter)] transition-colors border border-white/20"
+        >
+          <Zap size={15} /> Laser PNG
+        </a>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploadState === 'uploading'}
+          className="flex items-center gap-2 bg-gray-900 hover:bg-black text-white rounded-full px-4 py-2 text-sm font-medium font-[family-name:var(--font-inter)] transition-colors border border-white/20 disabled:opacity-50"
+        >
+          {uploadState === 'uploading' ? (
+            <><Upload size={15} className="animate-pulse" /> Salvando...</>
+          ) : uploadState === 'done' ? (
+            <><CheckCircle size={15} className="text-green-400" /> Salvo!</>
+          ) : uploadState === 'error' ? (
+            <><Upload size={15} className="text-red-400" /> Erro — tentar novamente</>
+          ) : (
+            <><Upload size={15} /> Importar Laser</>
+          )}
+        </button>
+        {laserUrl && (
+          <a
+            href={laserUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 bg-green-800 hover:bg-green-900 text-white rounded-full px-4 py-2 text-sm font-medium font-[family-name:var(--font-inter)] transition-colors"
+          >
+            <Download size={15} /> Ver Laser salvo
+          </a>
+        )}
         <button onClick={onClose} aria-label="Fechar"
           className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors">
           <X size={18} />
@@ -260,7 +340,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
                 {({ geographies }) => geographies.map(geo => (
                   <Geography
                     key={geo.rsmKey} geography={geo}
-                    fill="#e8e8e8" stroke="#666" strokeWidth={0.8}
+                    fill="#d0d0d0" stroke="#555" strokeWidth={0.9}
                     style={{
                       default: { outline: 'none' },
                       hover:   { outline: 'none' },
@@ -319,7 +399,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
                     .map(g => (
                       <Geography
                         key={g.rsmKey} geography={g}
-                        fill="#d6d6d6" stroke="#555" strokeWidth={0.8}
+                        fill="#d0d0d0" stroke="#555" strokeWidth={0.9}
                         style={{
                           default: { outline: 'none' },
                           hover:   { outline: 'none' },

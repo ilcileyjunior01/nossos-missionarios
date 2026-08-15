@@ -17,6 +17,7 @@ export interface Missionary {
   longitude: number | null
   status_placa: PlacaStatus
   eh_servico: boolean
+  plaqueta_laser_url: string | null
   created_at: string
   updated_at: string
 }
