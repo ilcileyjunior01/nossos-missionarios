@@ -179,6 +179,12 @@ const PT_NAME_TO_A2: Record<string, string> = {
   'vanuatu': 'VU',
 }
 
+/** Converte ID numérico ISO 3166-1 (usado pelo world-atlas) para alpha-2 minúsculo. */
+export function getAlpha2FromNumericId(numericId: number | string): string | null {
+  const a2 = NUM_TO_A2[Number(numericId)]
+  return a2 ? a2.toLowerCase() : null
+}
+
 /** Retorna o código alpha-2 em minúsculo (ex: "br", "us") ou null se não encontrado. */
 export function getCountryAlpha2(portugueseName: string | null | undefined): string | null {
   if (!portugueseName) return null

@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { Missionary } from '@/types/missionary'
 import { getMissionaryStatus, getMissionaryTimeLabel, isReturningSoon, getDaysUntilReturn, getMissionProgress } from '@/lib/missionary-status'
 import StatusBadge from './StatusBadge'
-import { MapPin, Bell } from 'lucide-react'
+import { MapPin, Bell, ScrollText } from 'lucide-react'
 import { getCountryFlagUrl } from '@/lib/countryNames'
 
 interface MissionaryCardProps {
@@ -161,6 +161,22 @@ export default function MissionaryCard({ missionary, onClick, index = 0 }: Missi
             {timeLabel}
           </p>
         )}
+      </div>
+
+      {/* Botão Gerar Plaqueta */}
+      <div className="px-3 pb-3">
+        <a
+          href={`/api/plaqueta?id=${missionary.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => e.stopPropagation()}
+          className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-xs font-semibold
+            font-[family-name:var(--font-inter)] transition-colors
+            bg-[#b8972a]/10 hover:bg-[#b8972a]/20 text-[#b8972a] border border-[#b8972a]/30"
+        >
+          <ScrollText size={12} />
+          Gerar Plaqueta
+        </a>
       </div>
 
       {/* Borda dourada inferior */}
