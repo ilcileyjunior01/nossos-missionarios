@@ -105,7 +105,7 @@ function worldCountrySvg(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const topology: any = JSON.parse(
     fs.readFileSync(
-      path.join(process.cwd(), 'node_modules', 'world-atlas', 'countries-110m.json'),
+      path.join(process.cwd(), 'public', 'countries-110m.json'),
       'utf-8',
     )
   )
