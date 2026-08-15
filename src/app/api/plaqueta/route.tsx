@@ -226,7 +226,6 @@ export async function GET(request: NextRequest) {
   // ── Mapa (SVG → PNG via sharp → base64 → img src) ──
   let mapB64: string | null = null
 
-  console.log('[mapa] isBrazil:', isBrazil, 'alpha2:', alpha2, 'pais_missao:', id ? 'real' : 'mock')
   if (isBrazil) {
     try {
       const statesJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public', 'brazil-states.json'), 'utf-8'))
@@ -234,8 +233,7 @@ export async function GET(request: NextRequest) {
       const svg = brazilToSvg(statesJson, MAP_W, MAP_H, markerXY)
       const png = new Resvg(svg, { fitTo: { mode: 'width', value: MAP_W } }).render().asPng()
       mapB64 = toB64(png, 'image/png')
-      console.log('[mapa] Brasil OK, png bytes:', png.length)
-    } catch (e) { console.error('[mapa] Brasil ERRO:', e) }
+    } catch { /* sem mapa */ }
   } else if (alpha2) {
     try {
       const svg = worldCountrySvg(alpha2, MAP_W, MAP_H,
