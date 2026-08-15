@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { X, Printer, UserCircle, Download, Zap, Upload, CheckCircle } from 'lucide-react'
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps'
@@ -93,14 +93,6 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
     if (normalize(nome).startsWith(normalize(pais))) return nome
     return `${pais} ${nome}`
   })()
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [brazilGeo, setBrazilGeo] = useState<any>(null)
-  useEffect(() => {
-    if (isBrazil) {
-      fetch('/brazil-states.json').then(r => r.json()).then(setBrazilGeo).catch(() => {})
-    }
-  }, [isBrazil])
 
   const [laserMode,   setLaserMode]   = useState(false)
   const [laserUrl,    setLaserUrl]    = useState<string | null>(missionary.plaqueta_laser_url ?? null)
@@ -343,7 +335,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
               projectionConfig={{ center: [-51, -14], scale: 213 }}
               style={{ width: '100%', height: '100%', display: 'block' }}
             >
-              <Geographies geography={brazilGeo ?? { type: 'FeatureCollection', features: [] }}>
+              <Geographies geography="/brazil-states.json">
                 {({ geographies }) => geographies.map(geo => (
                   <Geography
                     key={geo.rsmKey} geography={geo}
