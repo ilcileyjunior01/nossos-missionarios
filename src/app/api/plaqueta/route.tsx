@@ -5,6 +5,7 @@ import { getCountryAlpha2, getAlpha2FromNumericId } from '@/lib/countryNames'
 import fs from 'fs'
 import path from 'path'
 import sharp from 'sharp'
+import { Resvg } from '@resvg/resvg-js'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { feature: topoFeature } = require('topojson-client')
 
@@ -230,7 +231,7 @@ export async function GET(request: NextRequest) {
       const statesJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public', 'brazil-states.json'), 'utf-8'))
       const markerXY = (lon != null && lat != null) ? projectBrazil(lon, lat, MAP_W, MAP_H) : undefined
       const svg = brazilToSvg(statesJson, MAP_W, MAP_H, markerXY)
-      const png = await sharp(Buffer.from(svg)).png().toBuffer()
+      const png = new Resvg(svg, { fitTo: { mode: 'width', value: MAP_W } }).render().asPng()
       mapB64 = toB64(png, 'image/png')
     } catch { /* sem mapa */ }
   } else if (alpha2) {
@@ -240,7 +241,7 @@ export async function GET(request: NextRequest) {
         lat != null ? lat : undefined,
       )
       if (svg) {
-        const png = await sharp(Buffer.from(svg)).png().toBuffer()
+        const png = new Resvg(svg, { fitTo: { mode: 'width', value: MAP_W } }).render().asPng()
         mapB64 = toB64(png, 'image/png')
       }
     } catch { /* sem mapa */ }
