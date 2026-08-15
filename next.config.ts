@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  serverExternalPackages: ['@resvg/resvg-js', 'sharp', 'potrace'],
   typescript: {
     ignoreBuildErrors: false,
   },
