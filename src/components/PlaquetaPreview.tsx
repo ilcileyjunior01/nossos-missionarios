@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import Image from 'next/image'
 import { X, Printer, UserCircle, Download, Zap, Upload, CheckCircle } from 'lucide-react'
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps'
@@ -8,7 +8,6 @@ import { Missionary } from '@/types/missionary'
 import { getCountryAlpha2, getCountryName } from '@/lib/countryNames'
 import { supabase } from '@/lib/supabase'
 
-const BRAZIL_STATES_URL = '/brazil-states.json'
 const WORLD_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
 
 // ── Template: 1533 × 2121 px (13×18 cm @ 300 DPI) ────────────────────────
@@ -80,7 +79,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
     ? [missionary.longitude!, missionary.latitude!]
     : [-51, -14]
 
-  const isBrazil          = normalize(missionary.pais_missao ?? '') === 'brasil'
+  const isBrazil          = normalize(missionary.pais_missao ?? '') === 'brasil' || missionary.eh_servico
   const alpha2            = getCountryAlpha2(missionary.pais_missao)
   const flagUrl           = alpha2 ? `https://flagcdn.com/w80/${alpha2}.png` : null
   const normalizedCountry = missionary.pais_missao ? normalize(missionary.pais_missao) : null
@@ -94,6 +93,14 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
     if (normalize(nome).startsWith(normalize(pais))) return nome
     return `${pais} ${nome}`
   })()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [brazilGeo, setBrazilGeo] = useState<any>(null)
+  useEffect(() => {
+    if (isBrazil) {
+      fetch('/brazil-states.json').then(r => r.json()).then(setBrazilGeo).catch(() => {})
+    }
+  }, [isBrazil])
 
   const [laserMode,   setLaserMode]   = useState(false)
   const [laserUrl,    setLaserUrl]    = useState<string | null>(missionary.plaqueta_laser_url ?? null)
@@ -336,7 +343,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
               projectionConfig={{ center: [-51, -14], scale: 213 }}
               style={{ width: '100%', height: '100%', display: 'block' }}
             >
-              <Geographies geography={BRAZIL_STATES_URL}>
+              <Geographies geography={brazilGeo ?? { type: 'FeatureCollection', features: [] }}>
                 {({ geographies }) => geographies.map(geo => (
                   <Geography
                     key={geo.rsmKey} geography={geo}
