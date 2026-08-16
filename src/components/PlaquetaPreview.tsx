@@ -94,6 +94,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
     return `${pais} ${nome}`
   })()
 
+
   const [laserMode,   setLaserMode]   = useState(false)
   const [laserUrl,    setLaserUrl]    = useState<string | null>(missionary.plaqueta_laser_url ?? null)
   const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'done' | 'error'>('idle')
@@ -133,10 +134,8 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }, [missionary.id])
-  const [projCenter, setProjCenter] = useState<[number, number]>(
-    isBrazil ? [-51, -14] : (hasCoords ? coords : [0, 0])
-  )
-  const [projScale, setProjScale] = useState(isBrazil ? 213 : 200)
+  const [projCenter, setProjCenter] = useState<[number, number]>(hasCoords ? coords : [0, 0])
+  const [projScale, setProjScale] = useState(200)
   const fittedRef   = useRef(false)
   const plaquetaRef = useRef<HTMLDivElement>(null)
 
@@ -153,6 +152,27 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
       console.error('Erro ao exportar PNG:', err)
     }
   }, [missionary.nome])
+
+  const handlePrint = useCallback(async () => {
+    if (!plaquetaRef.current) return
+    try {
+      const { toPng } = await import('html-to-image')
+      const dataUrl = await toPng(plaquetaRef.current, { pixelRatio: 4, cacheBust: true })
+      const win = window.open('', '_blank')
+      if (!win) { alert('Permita pop-ups para imprimir.'); return }
+      win.document.write(`<!DOCTYPE html><html><head><style>
+        @page { size: 130mm 180mm; margin: 0; }
+        body { margin: 0; padding: 0; }
+        img { width: 130mm; height: 180mm; display: block; }
+      </style></head><body>
+        <img src="${dataUrl}" />
+        <script>window.onload = function(){ window.print(); window.close(); }<\/script>
+      </body></html>`)
+      win.document.close()
+    } catch (err) {
+      console.error('Erro ao imprimir:', err)
+    }
+  }, [])
 
   return (
     <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -183,7 +203,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
           <Download size={15} /> Exportar PNG
         </button>
         <button
-          onClick={() => window.print()}
+          onClick={handlePrint}
           className="flex items-center gap-2 bg-[#b8972a] hover:bg-[#9f7f1f] text-white rounded-full px-4 py-2 text-sm font-medium font-[family-name:var(--font-inter)] transition-colors"
         >
           <Printer size={15} /> Imprimir
@@ -329,96 +349,64 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
           left: MAP_L, top: MAP_T,
           width: MAP_W, height: MAP_H,
         }}>
-          {isBrazil ? (
-            <ComposableMap
-              width={MAP_W} height={MAP_H}
-              projectionConfig={{ center: [-51, -14], scale: 213 }}
-              style={{ width: '100%', height: '100%', display: 'block' }}
-            >
-              <Geographies geography="/brazil-states.json">
-                {({ geographies }) => geographies.map(geo => (
-                  <Geography
-                    key={geo.rsmKey} geography={geo}
-                    fill="#d0d0d0" stroke="#555" strokeWidth={0.9}
-                    style={{
-                      default: { outline: 'none' },
-                      hover:   { outline: 'none' },
-                      pressed: { outline: 'none' },
-                    }}
-                  />
-                ))}
-              </Geographies>
-              {hasCoords && (
-                <Marker coordinates={coords}>
-                  <g transform="translate(-5,-13)">
-                    <ellipse cx="5" cy="14" rx="3" ry="1.5" fill="rgba(0,0,0,0.25)" />
-                    <path d="M5 0C2.9 0 1.2 1.8 1.2 4c0 2.9 3.8 8 3.8 8S8.8 6.9 8.8 4C8.8 1.8 7.1 0 5 0z" fill="#1a56db" />
-                    <circle cx="5" cy="4" r="1.7" fill="white" />
-                  </g>
-                </Marker>
-              )}
-            </ComposableMap>
-          ) : (
-            <ComposableMap
-              width={MAP_W} height={MAP_H}
-              projectionConfig={{ center: projCenter, scale: projScale }}
-              style={{ width: '100%', height: '100%', display: 'block' }}
-            >
-              <Geographies geography={WORLD_URL}>
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {({ geographies }) => {
-                  const geos = geographies as any[]
-                  if (!fittedRef.current && normalizedCountry) {
-                    const target = geos.find(g => {
-                      const name = getCountryName(g.id)
-                      return name ? normalize(name) === normalizedCountry : false
-                    })
-                    if (target) {
-                      const bbox = getGeoBbox(target.geometry as Geometry)
-                      if (bbox) {
-                        const [[west, south], [east, north]] = bbox
-                        const scaleW = (MAP_W * 0.85) / ((east - west) * Math.PI / 180)
-                        const northR = north * Math.PI / 180
-                        const southR = south * Math.PI / 180
-                        const mercH  = Math.log(Math.tan(Math.PI/4 + northR/2)) - Math.log(Math.tan(Math.PI/4 + southR/2))
-                        const scaleH = (MAP_H * 0.85) / mercH
-                        fittedRef.current = true
-                        setTimeout(() => {
-                          setProjCenter([(west + east) / 2, (south + north) / 2])
-                          setProjScale(Math.min(scaleW, scaleH))
-                        }, 0)
-                      }
+          <ComposableMap
+            width={MAP_W} height={MAP_H}
+            projectionConfig={{ center: projCenter, scale: projScale }}
+            style={{ width: '100%', height: '100%', display: 'block' }}
+          >
+            <Geographies geography={WORLD_URL}>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {({ geographies }) => {
+                const geos = geographies as any[]
+                if (!fittedRef.current && normalizedCountry) {
+                  const target = geos.find(g => {
+                    const name = getCountryName(g.id)
+                    return name ? normalize(name) === normalizedCountry : false
+                  })
+                  if (target) {
+                    const bbox = getGeoBbox(target.geometry as Geometry)
+                    if (bbox) {
+                      const [[west, south], [east, north]] = bbox
+                      const scaleW = (MAP_W * 0.90) / ((east - west) * Math.PI / 180)
+                      const northR = north * Math.PI / 180
+                      const southR = south * Math.PI / 180
+                      const mercH  = Math.log(Math.tan(Math.PI/4 + northR/2)) - Math.log(Math.tan(Math.PI/4 + southR/2))
+                      const scaleH = (MAP_H * 0.90) / mercH
+                      fittedRef.current = true
+                      setTimeout(() => {
+                        setProjCenter([(west + east) / 2, (south + north) / 2])
+                        setProjScale(Math.min(scaleW, scaleH * 1.1))
+                      }, 0)
                     }
                   }
-                  return geos
-                    .filter(g => {
-                      const name = getCountryName(g.id)
-                      return normalizedCountry && name ? normalize(name) === normalizedCountry : false
-                    })
-                    .map(g => (
-                      <Geography
-                        key={g.rsmKey} geography={g}
-                        fill="#d0d0d0" stroke="#555" strokeWidth={0.9}
-                        style={{
-                          default: { outline: 'none' },
-                          hover:   { outline: 'none' },
-                          pressed: { outline: 'none' },
-                        }}
-                      />
-                    ))
-                }}
-              </Geographies>
-              {hasCoords && (
-                <Marker coordinates={coords}>
-                  <g transform="translate(-5,-13)">
-                    <ellipse cx="5" cy="14" rx="3" ry="1.5" fill="rgba(0,0,0,0.25)" />
-                    <path d="M5 0C2.9 0 1.2 1.8 1.2 4c0 2.9 3.8 8 3.8 8S8.8 6.9 8.8 4C8.8 1.8 7.1 0 5 0z" fill="#1a56db" />
-                    <circle cx="5" cy="4" r="1.7" fill="white" />
-                  </g>
-                </Marker>
-              )}
-            </ComposableMap>
-          )}
+                }
+                return geos
+                  .filter(g => {
+                    const name = getCountryName(g.id)
+                    return normalizedCountry && name ? normalize(name) === normalizedCountry : false
+                  })
+                  .map(g => (
+                    <Geography
+                      key={g.rsmKey} geography={g}
+                      style={{
+                        default: { fill: '#d0d0d0', stroke: '#555', strokeWidth: 0.9, outline: 'none' },
+                        hover:   { fill: '#d0d0d0', stroke: '#555', strokeWidth: 0.9, outline: 'none' },
+                        pressed: { fill: '#d0d0d0', stroke: '#555', strokeWidth: 0.9, outline: 'none' },
+                      }}
+                    />
+                  ))
+              }}
+            </Geographies>
+            {hasCoords && (
+              <Marker coordinates={coords}>
+                <g transform="translate(-5,-13)">
+                  <ellipse cx="5" cy="14" rx="3" ry="1.5" fill="rgba(0,0,0,0.25)" />
+                  <path d="M5 0C2.9 0 1.2 1.8 1.2 4c0 2.9 3.8 8 3.8 8S8.8 6.9 8.8 4C8.8 1.8 7.1 0 5 0z" fill="#1a56db" />
+                  <circle cx="5" cy="4" r="1.7" fill="white" />
+                </g>
+              </Marker>
+            )}
+          </ComposableMap>
         </div>
 
         {/* ── 5. BANDEIRA ── */}
