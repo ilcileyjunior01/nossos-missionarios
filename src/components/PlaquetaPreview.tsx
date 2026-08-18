@@ -300,7 +300,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
           }}>
             <p style={{
               margin: 0,
-              fontFamily: '"Times New Roman", Georgia, serif',
+              fontFamily: '"Comic Sans MS", cursive',
               fontSize: missaoNome.length <= 16 ? 15 : missaoNome.length <= 22 ? 13 : missaoNome.length <= 28 ? 11 : 9,
               fontWeight: 700,
               color: '#111',
@@ -321,7 +321,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
           {titulo && (
             <p style={{
               margin: 0,
-              fontFamily: 'Arial, Helvetica, sans-serif',
+              fontFamily: '"Comic Sans MS", cursive',
               fontSize: 10,
               fontWeight: 700,
               color: '#111',
@@ -333,7 +333,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
           )}
           <p style={{
             margin: '2px 0 0',
-            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontFamily: '"Comic Sans MS", cursive',
             fontSize: 16,
             fontWeight: 700,
             color: '#111',
@@ -433,7 +433,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
           position: 'absolute',
           left: ALA_L, top: FT_Y,
           margin: 0,
-          fontFamily: 'Arial, Helvetica, sans-serif',
+          fontFamily: '"Comic Sans MS", cursive',
           fontSize: 12, color: '#111',
         }}>
           {missionary.ala ?? ''}
@@ -444,7 +444,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
           position: 'absolute',
           left: DATE_L, top: FT_Y,
           margin: 0,
-          fontFamily: 'Arial, Helvetica, sans-serif',
+          fontFamily: '"Comic Sans MS", cursive',
           fontSize: 12, color: '#111',
         }}>
           {formatDate(missionary.data_inicio)} - {formatDate(missionary.data_termino)}

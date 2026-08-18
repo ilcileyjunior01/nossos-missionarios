@@ -306,7 +306,7 @@ export async function GET(request: NextRequest) {
             position: 'absolute', top: MN_T, left: 192,
             width: W - 192 - 4,
             display: 'flex', justifyContent: 'center',
-            fontFamily: 'Georgia, serif',
+            fontFamily: '"Comic Sans MS", cursive',
             fontSize: missao.length <= 16 ? 15 : missao.length <= 22 ? 13 : missao.length <= 28 ? 11 : 9,
             fontWeight: 700, color: '#111',
           }}>
