@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { X, Printer, UserCircle, Download, Zap, Upload, CheckCircle } from 'lucide-react'
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps'
 import { Missionary } from '@/types/missionary'
-import { getCountryAlpha2, getCountryName } from '@/lib/countryNames'
+import { getCountryAlpha2, getAlpha2FromNumericId } from '@/lib/countryNames'
 import { supabase } from '@/lib/supabase'
 
 const WORLD_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
@@ -352,26 +352,23 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
           <ComposableMap
             width={MAP_W} height={MAP_H}
             projectionConfig={{ center: projCenter, scale: projScale }}
-            style={{ width: '100%', height: '100%', display: 'block' }}
+            style={{ width: '100%', height: '100%', display: 'block', filter: 'drop-shadow(0 0 12px rgba(30,80,220,1))' }}
           >
             <Geographies geography={WORLD_URL}>
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {({ geographies }) => {
                 const geos = geographies as any[]
-                if (!fittedRef.current && normalizedCountry) {
-                  const target = geos.find(g => {
-                    const name = getCountryName(g.id)
-                    return name ? normalize(name) === normalizedCountry : false
-                  })
+                if (!fittedRef.current && alpha2) {
+                  const target = geos.find(g => getAlpha2FromNumericId(g.id) === alpha2)
                   if (target) {
                     const bbox = getGeoBbox(target.geometry as Geometry)
                     if (bbox) {
                       const [[west, south], [east, north]] = bbox
-                      const scaleW = (MAP_W * 0.90) / ((east - west) * Math.PI / 180)
+                      const scaleW = (MAP_W * 0.96) / ((east - west) * Math.PI / 180)
                       const northR = north * Math.PI / 180
                       const southR = south * Math.PI / 180
                       const mercH  = Math.log(Math.tan(Math.PI/4 + northR/2)) - Math.log(Math.tan(Math.PI/4 + southR/2))
-                      const scaleH = (MAP_H * 0.90) / mercH
+                      const scaleH = (MAP_H * 0.96) / mercH
                       fittedRef.current = true
                       setTimeout(() => {
                         setProjCenter([(west + east) / 2, (south + north) / 2])
@@ -381,10 +378,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
                   }
                 }
                 return geos
-                  .filter(g => {
-                    const name = getCountryName(g.id)
-                    return normalizedCountry && name ? normalize(name) === normalizedCountry : false
-                  })
+                  .filter(g => alpha2 && getAlpha2FromNumericId(g.id) === alpha2)
                   .map(g => (
                     <Geography
                       key={g.rsmKey} geography={g}
