@@ -34,7 +34,7 @@ const MAP_W   = 151
 const MAP_H   = 138
 
 const FLAG_L  = 113
-const FLAG_T  = 475
+const FLAG_T  = 455
 
 const FT_Y    = 502
 const ALA_L   = 32
@@ -417,7 +417,7 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
               src={flagUrl}
               alt={missionary.pais_missao ?? ''}
               crossOrigin="anonymous"
-              style={{ height: 20, width: 'auto', border: '1px solid #bbb', display: 'block' }}
+              style={{ height: 40, width: 'auto', border: '1px solid #bbb', display: 'block' }}
             />
           </div>
         )}
