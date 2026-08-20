@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import Image from 'next/image'
 import { X, Printer, UserCircle, Download, Zap, Upload, CheckCircle } from 'lucide-react'
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps'
 import { Missionary } from '@/types/missionary'
@@ -271,13 +270,12 @@ export default function PlaquetaPreview({ missionary, onClose }: Props) {
           overflow: 'hidden',
         }}>
           {missionary.foto_url ? (
-            <Image
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={missionary.foto_url}
               alt={missionary.nome}
-              fill
-              className="object-cover object-top"
-              sizes={`${PHOTO_W}px`}
               crossOrigin="anonymous"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
             />
           ) : (
             <div style={{
