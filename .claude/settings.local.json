@@ -28,7 +28,22 @@
       "Bash(git push:*)",
       "Bash(xargs grep:*)",
       "Bash(npm list:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "mcp__plugin_vercel_vercel__list_deployments",
+      "mcp__plugin_vercel_vercel__get_runtime_logs",
+      "mcp__plugin_vercel_vercel__get_project",
+      "mcp__plugin_vercel_vercel__get_deployment",
+      "Skill(schedule)",
+      "Read(//tmp/**)",
+      "Bash(npx playwright:*)",
+      "Bash(where playwright:*)",
+      "Bash(playwright --version)",
+      "Bash(npx:*)",
+      "Bash(pkill -f \"next start\")",
+      "Bash(taskkill /PID 24320 /F)",
+      "mcp__plugin_vercel_vercel__list_teams",
+      "Bash(where vercel:*)",
+      "WebFetch(domain:nossos-missionarios.vercel.app)"
     ]
   }
 }
