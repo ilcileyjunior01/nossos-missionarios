@@ -9,6 +9,8 @@ interface AuthContextValue {
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
+  sendPasswordReset: (email: string) => Promise<{ error: string | null }>
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -16,6 +18,8 @@ const AuthContext = createContext<AuthContextValue>({
   loading: true,
   signIn: async () => ({ error: null }),
   signOut: async () => {},
+  sendPasswordReset: async () => ({ error: null }),
+  updatePassword: async () => ({ error: null }),
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -44,8 +48,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut()
   }
 
+  async function sendPasswordReset(email: string) {
+    const redirectTo = `${window.location.origin}/auth/reset-password`
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+    return { error: error?.message ?? null }
+  }
+
+  async function updatePassword(newPassword: string) {
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    return { error: error?.message ?? null }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signOut, sendPasswordReset, updatePassword }}>
       {children}
     </AuthContext.Provider>
   )

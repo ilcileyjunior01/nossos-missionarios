@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { LogIn, LogOut, Shield, Download } from 'lucide-react'
+import { LogIn, LogOut, Shield, Download, KeyRound, X, Loader2, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import LoginModal from './LoginModal'
@@ -36,9 +36,71 @@ function TempleIcon() {
   )
 }
 
+function ChangePasswordModal({ onClose }: { onClose: () => void }) {
+  const { updatePassword } = useAuth()
+  const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    if (password.length < 6) { setError('A senha deve ter pelo menos 6 caracteres.'); return }
+    if (password !== confirm) { setError('As senhas não coincidem.'); return }
+    setLoading(true)
+    const { error } = await updatePassword(password)
+    setLoading(false)
+    if (error) { setError('Erro ao atualizar a senha. Tente novamente.') }
+    else { setSuccess(true); setTimeout(onClose, 2000) }
+  }
+
+  return (
+    <div className="modal-backdrop fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="modal-panel bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="px-6 py-5 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #1a2744 0%, #253660 100%)' }}>
+          <div>
+            <h2 className="text-white text-lg font-bold" style={{ fontFamily: 'var(--font-playfair)' }}>Trocar Senha</h2>
+            <p className="text-[#f0d97a]/70 text-xs mt-0.5 font-[family-name:var(--font-inter)]">Estaca SP BR Taboão</p>
+          </div>
+          <button onClick={onClose} aria-label="Fechar" className="text-white/60 hover:text-white transition-colors"><X size={18} /></button>
+        </div>
+        <div className="px-6 py-6">
+          {success ? (
+            <p className="text-sm text-green-600 text-center font-[family-name:var(--font-inter)] py-4">Senha atualizada com sucesso!</p>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label htmlFor="cp-password" className="block text-xs font-medium text-gray-500 font-[family-name:var(--font-inter)] uppercase tracking-wider">Nova senha</label>
+                <div className="relative">
+                  <input id="cp-password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required autoFocus minLength={6} placeholder="Mínimo 6 caracteres" className="w-full px-4 py-2.5 pr-10 text-sm border border-gray-200 rounded-xl font-[family-name:var(--font-inter)] focus:outline-none focus:border-[#1a2744] transition-colors" />
+                  <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">{showPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="cp-confirm" className="block text-xs font-medium text-gray-500 font-[family-name:var(--font-inter)] uppercase tracking-wider">Confirmar senha</label>
+                <input id="cp-confirm" type={showPassword ? 'text' : 'password'} value={confirm} onChange={(e) => setConfirm(e.target.value)} required placeholder="Repita a senha" className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl font-[family-name:var(--font-inter)] focus:outline-none focus:border-[#1a2744] transition-colors" />
+              </div>
+              {error && <p className="text-xs text-red-500 font-[family-name:var(--font-inter)] text-center">{error}</p>}
+              <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 bg-[#1a2744] hover:bg-[#253660] disabled:opacity-60 text-white text-sm font-medium font-[family-name:var(--font-inter)] py-2.5 rounded-xl transition-colors">
+                {loading ? <Loader2 size={15} className="animate-spin" /> : <KeyRound size={15} />}
+                Salvar nova senha
+              </button>
+            </form>
+          )}
+        </div>
+        <div className="h-0.5 bg-gradient-to-r from-transparent via-[#b8972a] to-transparent" />
+      </div>
+    </div>
+  )
+}
+
 export default function Header() {
   const { user, signOut, loading } = useAuth()
   const [showLogin, setShowLogin] = useState(false)
+  const [showChangePassword, setShowChangePassword] = useState(false)
 
   return (
     <>
@@ -113,6 +175,13 @@ export default function Header() {
                     Importar LCR
                   </Link>
                   <button
+                    onClick={() => setShowChangePassword(true)}
+                    className="flex items-center gap-1.5 text-[11px] text-white/70 hover:text-[#f0d97a] font-[family-name:var(--font-inter)] transition-colors"
+                  >
+                    <KeyRound size={12} />
+                    Trocar senha
+                  </button>
+                  <button
                     onClick={signOut}
                     className="flex items-center gap-1.5 text-[11px] text-white/70 hover:text-white font-[family-name:var(--font-inter)] transition-colors"
                   >
@@ -149,6 +218,7 @@ export default function Header() {
       </header>
 
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+      {showChangePassword && <ChangePasswordModal onClose={() => setShowChangePassword(false)} />}
     </>
   )
 }
